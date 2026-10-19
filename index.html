@@ -541,7 +541,7 @@ const BIG_LATE={1:20,2:17,3:21};
 const W={
   1:{lane:.15,deaths:.20,farm:.25,fights:.20,obj:.12,vision:0,dec:.08},
   2:{lane:.18,deaths:.20,farm:.18,fights:.24,obj:.12,vision:0,dec:.08},
-  3:{lane:.15,deaths:.20,farm:.10,fights:.27,obj:.13,vision:.05,dec:.10},
+  3:{lane:.15,deaths:.20,farm:.12,fights:.28,obj:.15,vision:0,dec:.10},
   4:{lane:.12,deaths:.22,farm:.03,fights:.25,obj:.06,vision:.24,dec:.08},
   5:{lane:.12,deaths:.22,farm:.02,fights:.20,obj:.04,vision:.32,dec:.08}};
 const ASPECTS=()=>[
@@ -891,7 +891,7 @@ function finalize(p){
   p.R=tw?acc/tw:50;
   p.leaver=(p.leaver_status||0)>=2;
   p.ruin=p.leaver?100:Math.round(cl(100-p.R));
-  p.worst=ASPECTS().filter(([k])=>p.A[k]&&w[k]>=.05).map(([k,n])=>({k,n,s:p.A[k].s,w:w[k]})).sort((a,b)=>(a.s-50)*a.w-(b.s-50)*b.w)[0]||null;
+  p.worst=ASPECTS().filter(([k])=>p.A[k]&&w[k]>=.1&&p.A[k].s<50).map(([k,n])=>({k,n,s:p.A[k].s,w:w[k]})).sort((a,b)=>(a.s-50)*a.w-(b.s-50)*b.w)[0]||null;
 }
 
 function killStreakTime(p,n){
@@ -1235,10 +1235,10 @@ function renderDraft(){
 function aspectCard(p,k,n,d,open){
   const a=p.A[k],w=W[p.pos][k];
   if(!a)return `<div class="asp na"><div class="asp-top"><div><h4>${n}</h4><small>${d}</small></div><div class="asp-score"><b>—</b></div></div><p style="margin:12px 0 0;font-size:13px">${S.parsed?L('Для цього гравця даних немає.','No data for this player.','Для этого игрока данных нет.'):L('З’явиться після парсингу матчу.','Available after the match is parsed.','Появится после парсинга матча.')}</p></div>`;
-  const g=gradeOf(a.s),s=Math.round(a.s);
-  return `<details class="asp"${open?' open':''}><summary>
-    <div class="asp-top"><div><h4>${n}</h4><small>${d} · ${L('вага','weight','вес')} ${Math.round(w*100)}%</small></div><div class="asp-score c${g.g}"><b>${s}</b><span class="grade g${g.g}">${g.t}</span></div></div>
-    <div class="scale c${g.g}"><i style="--w:${Math.max(2,s)}%"></i></div>
+  const g=gradeOf(a.s),s=Math.round(a.s),off=!w;
+  return `<details class="asp${off?' na':''}"${open&&!off?' open':''}><summary>
+    <div class="asp-top"><div><h4>${n}</h4><small>${off?L(`${d} · не впливає на оцінку для ${POS(p.pos)}`,`${d} · not scored for a ${POS(p.pos)}`,`${d} · не влияет на оценку для ${POS(p.pos)}`):`${d} · ${L('вага','weight','вес')} ${Math.round(w*100)}%`}</small></div><div class="asp-score ${off?'':'c'+g.g}"><b>${s}</b>${off?`<span class="grade" style="background:var(--ink);color:var(--muted)">${L('не оцінюється','not scored','не оценивается')}</span>`:`<span class="grade g${g.g}">${g.t}</span>`}</div></div>
+    <div class="scale ${off?'':'c'+g.g}"><i style="--w:${Math.max(2,s)}%"></i></div>
     <div class="asp-stats">${a.stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>
     <span class="more">${L('Деталі','Details','Детали')} (${a.F.length})</span></summary>
     <ul class="facts sm">${a.F.map(f=>`<li class="${f.c}">${esc(f.t)}</li>`).join('')}</ul>
@@ -1270,10 +1270,14 @@ function deathsHtml(p){
 }
 
 function blameHtml(){
-  const losers=(S.m.radiant_win?S.sides.d:S.sides.r).slice().sort((a,b)=>b.ruin-a.ruin);
-  const total=losers.reduce((a,p)=>a+Math.max(3,p.ruin),0);
-  return `<div class="blame"><div class="blame-h">${L('Частка провини в команді, що програла. Натисни на героя, щоб відкрити його досьє.','Share of blame on the losing team. Tap a hero to open their file.','Доля вины в проигравшей команде. Нажми на героя, чтобы открыть его досье.')}</div>
-  <div class="blame-bar">${losers.map(p=>{const w=Math.max(3,p.ruin)/total;return `<button type="button" data-sel="${p.i}" class="c${verdOf(p.ruin).c} ${p.i===S.sel?'sel':''}" style="flex:${w.toFixed(3)}" title="${esc(pname(p))} — ${esc(H(p))}: ${RUIN().toLowerCase()} ${p.ruin}">${heroImg(p)?`<img src="${heroImg(p)}" alt="${esc(H(p))}" onerror="this.remove()">`:''}<span>${Math.round(w*100)}%</span></button>`}).join('')}</div></div>`;
+  const row=(won)=>{
+    const t=(won===!!S.m.radiant_win?S.sides.r:S.sides.d).slice().sort((a,b)=>won?a.ruin-b.ruin:b.ruin-a.ruin);
+    const val=p=>Math.max(3,won?100-p.ruin:p.ruin),total=t.reduce((a,p)=>a+val(p),0),sd=SIDE(t[0]&&t[0].side);
+    const head=won?L(`Внесок у перемогу · ${sd}`,`Share of the win · ${sd}`,`Вклад в победу · ${sd}`):L(`Частка провини · ${sd}`,`Share of blame · ${sd}`,`Доля вины · ${sd}`);
+    return `<div class="blame-h" style="margin-top:${won?14:0}px"><span class="pill ${won?'r':'d'}" style="margin-right:8px">${won?L('перемогли','won','победили'):L('програли','lost','проиграли')}</span>${head}</div>
+    <div class="blame-bar">${t.map(p=>{const w=val(p)/total;return `<button type="button" data-sel="${p.i}" class="c${verdOf(p.ruin).c} ${p.i===S.sel?'sel':''}" style="flex:${w.toFixed(3)}" title="${esc(pname(p))} — ${esc(H(p))}: ${RUIN().toLowerCase()} ${p.ruin}">${heroImg(p)?`<img src="${heroImg(p)}" alt="${esc(H(p))}" onerror="this.remove()">`:''}<span>${Math.round(w*100)}%</span></button>`}).join('')}</div>`;
+  };
+  return `<div class="blame">${row(false)}${row(true)}<div class="note">${L('Натисни на героя, щоб відкрити його досьє.','Tap a hero to open their file.','Нажми на героя, чтобы открыть его досье.')}</div></div>`;
 }
 
 function select(i){
