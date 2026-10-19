@@ -285,7 +285,20 @@ footer a{color:inherit}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:0 28px}
 .mapwrap{max-width:560px}
 .map{display:block;width:100%;height:auto;border-radius:10px;background:#111}
-.m-heat{fill:var(--tape)}
+.m-heat{stroke:rgba(0,0,0,.45);stroke-width:.25;cursor:help}
+.m-img{filter:brightness(.62) saturate(.75)}
+.m-route{stroke-width:.7;stroke-dasharray:1.6 1;fill:none;pointer-events:none}
+.m-hit{stroke:transparent;stroke-width:3.2;cursor:help}
+.m-death{cursor:help}
+.m-death line{stroke:#ff3b30;stroke-width:.85;stroke-linecap:round}
+.m-obs,.m-sen{cursor:help}
+.mapctl{display:grid;gap:10px;margin-bottom:12px}
+.swatches{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);padding:0}
+.sw.on{border-color:var(--text);box-shadow:0 0 0 2px var(--ink) inset}
+.sw-custom{position:relative;width:26px;height:26px;border-radius:50%;overflow:hidden;border:2px dashed var(--muted);cursor:pointer;display:inline-block}
+.sw-custom input{position:absolute;inset:-6px;width:40px;height:40px;border:0;padding:0;cursor:pointer;opacity:.9}
+.maptip{min-height:22px;margin-top:10px;font:600 13px var(--f-mono);color:var(--soft)}
 .m-obs{fill:#f5c443;stroke:#000;stroke-width:.4}
 .m-sen{fill:#5aa9ff;stroke:#000;stroke-width:.4}
 .m-dead{stroke:var(--t3);stroke-width:.9}
@@ -507,7 +520,7 @@ function applyStatic(){
 }
 function setLang(l){
   if(l===LANG)return;LANG=l;store.set('nf_lang',l);applyStatic();renderChips();
-  if(S){const keep={sel:S.sel,epf:S.epf,gm:S.gm,tab:S.tab,mapm:S.mapm};S=analyze(S.m);Object.assign(S,keep);render()}
+  if(S){const keep={sel:S.sel,epf:S.epf,gm:S.gm,tab:S.tab,mapT:S.mapT,mapL:S.mapL};S=analyze(S.m);Object.assign(S,keep);render()}
   else if($('status').classList.contains('err'))setStatus('');
 }
 
@@ -1040,7 +1053,12 @@ function renderTab(){
   else if(t==='profile')h=profileHtml(p);
   else h=miscHtml(p);
   el.innerHTML=h;
-  el.querySelectorAll('[data-mapm]').forEach(b=>b.onclick=()=>{S.mapm=b.dataset.mapm;renderTab()});
+  el.querySelectorAll('[data-mapt]').forEach(b=>b.onclick=()=>{S.mapT=b.dataset.mapt==='all'?'all':+b.dataset.mapt;renderTab()});
+  el.querySelectorAll('[data-mapl]').forEach(b=>b.onclick=()=>{const k=b.dataset.mapl;S.mapL=Object.assign({heat:1,wards:1,deaths:1,route:1},S.mapL);S.mapL[k]=S.mapL[k]?0:1;renderTab()});
+  el.querySelectorAll('[data-mapc]').forEach(b=>b.onclick=()=>{store.set('nf_mapc',b.dataset.mapc);renderTab()});
+  const ci=el.querySelector('#mapColor');if(ci)ci.onchange=()=>{store.set('nf_mapc',ci.value);renderTab()};
+  const svg=el.querySelector('svg.map'),tip=el.querySelector('#mapTip');
+  if(svg&&tip){const show=e=>{const t=e.target.closest('[data-tip]');if(t)tip.textContent=t.dataset.tip};svg.addEventListener('mouseover',show);svg.addEventListener('click',show)}
 }
 
 /* предмети й скіли */
@@ -1116,22 +1134,48 @@ function fightsHtml(p){
 }
 
 /* карта */
+const MAPCOLORS=['#00e5ff','#ff3b30','#ff4fd8','#76ff03','#ffffff','#f5c443'];
+function mapColor(){const c=store.get('nf_mapc');return /^#[0-9a-f]{6}$/i.test(c||'')?c:'#00e5ff'}
 function mapHtml(p){
   if(!S.parsed)return needParse();
-  const mode=S.mapm||'lane',Wd=p.X.wards||[];
-  let marks='',info;
-  if(mode==='lane'){
-    const lp=p.lane_pos||{};let mx=1;for(const x in lp)for(const y in lp[x])mx=Math.max(mx,lp[x][y]);
-    for(const x in lp)for(const y in lp[x])marks+=`<circle class="m-heat" cx="${x-64}" cy="${192-y}" r="1.5" opacity="${(.2+.8*lp[x][y]/mx).toFixed(2)}"/>`;
-    info=Object.keys(lp).length?L('Де стояв гравець у перші 10 хвилин: що яскравіше, то довше.','Where the player stood during the first 10 minutes: brighter means longer.','Где стоял игрок в первые 10 минут: чем ярче, тем дольше.'):L('Немає даних про позиції.','No position data.','Нет данных о позициях.');
-  }else{
-    for(const w of Wd){const nm=w.type==='obs'?L('Обсервер','Observer','Обсервер'):L('Сентрі','Sentry','Сентри');
-      marks+=`<circle class="${w.type==='obs'?'m-obs':'m-sen'}${w.killed?' m-dead':''}" cx="${(w.x-64).toFixed(1)}" cy="${(192-w.y).toFixed(1)}" r="${w.type==='obs'?2.3:1.8}"><title>${esc(`${nm} ${mmss(w.t)} · ${L('жив','lived','жил')} ${mmss(w.life)}${w.by?' · '+L('зніс','destroyed by','снёс')+' '+w.by.n:''}`)}</title></circle>`}
-    const o=Wd.filter(w=>w.type==='obs'),s=Wd.filter(w=>w.type==='sen'),k=o.filter(w=>w.killed).length;
-    info=L(`Жовті — обсервери (${o.length}, знесли ${k}), сині — сентрі (${s.length}). Червона обводка — вард знесли вороги. Наведи на точку, щоб побачити час.`,`Yellow = observers (${o.length}, ${k} destroyed), blue = sentries (${s.length}). Red outline = destroyed by the enemy. Hover a dot for timing.`,`Жёлтые — обсерверы (${o.length}, снесли ${k}), синие — сентри (${s.length}). Красная обводка — вард снесли враги. Наведи на точку, чтобы увидеть время.`);
+  const dur=S.dur,col=mapColor(),spans=[10,20,30,40].filter(m=>m*60<dur);
+  const T=spans.includes(S.mapT)?S.mapT:'all',lim=T==='all'?Infinity:T*60;
+  const Ly=S.mapL||{heat:1,wards:1,deaths:1,route:1};
+  const obsN=L('обсервер','observer','обсервер'),senN=L('сентрі','sentry','сентри'),dthN=L('смерть','death','смерть');
+  const what=e=>e.k==='obs'?obsN:e.k==='sen'?senN:dthN;
+  const ev=[];
+  for(const w of(p.X.wards||[]))if(w.t<=lim)ev.push({t:w.t,x:w.x,y:w.y,k:w.type,tip:L(`${mmss(w.t)} · поставив ${w.type==='obs'?'обсервер':'сентрі'} · жив ${mmss(w.life)}${w.by?' · зніс '+w.by.n:''}`,`${mmss(w.t)} · placed ${w.type==='obs'?'an observer':'a sentry'} · lived ${mmss(w.life)}${w.by?' · destroyed by '+w.by.n:''}`,`${mmss(w.t)} · поставил ${w.type==='obs'?'обсервер':'сентри'} · жил ${mmss(w.life)}${w.by?' · снёс '+w.by.n:''}`)});
+  for(const f of(S.m.teamfights||[])){
+    const x=f.players&&f.players[p.i];if(!x||!x.deaths_pos||f.start>lim)continue;
+    for(const px in x.deaths_pos)for(const py in x.deaths_pos[px])ev.push({t:f.start,x:+px,y:+py,k:'death',tip:L(`${mmss(f.start)}–${mmss(f.end)} · помер у бійці`,`${mmss(f.start)}–${mmss(f.end)} · died in a teamfight`,`${mmss(f.start)}–${mmss(f.end)} · умер в драке`)});
   }
-  return `<div class="sec-h"><h3>${L('Карта','Map','Карта')} · ${esc(H(p))}</h3><div class="seg"><button type="button" data-mapm="lane" class="${mode==='lane'?'on':''}">${L('Позиції до 10 хв','Positions 0–10 min','Позиции до 10 мин')}</button><button type="button" data-mapm="wards" class="${mode==='wards'?'on':''}">${L('Варди','Wards','Варды')} (${Wd.length})</button></div></div>
-  <div class="mapwrap"><svg class="map" viewBox="0 0 128 128" role="img" aria-label="${esc(info)}"><image href="${MAPIMG}" x="0" y="0" width="128" height="128" preserveAspectRatio="none"/>${marks}</svg><div class="note">${esc(info)}</div></div>`;
+  ev.sort((a,b)=>a.t-b.t);
+  const X=v=>(v-64).toFixed(1),Y=v=>(192-v).toFixed(1);
+  let g='';
+  const lp=p.lane_pos||{};let heatN=0;
+  if(Ly.heat){let mx=1;for(const x in lp)for(const y in lp[x])mx=Math.max(mx,lp[x][y]);
+    for(const x in lp)for(const y in lp[x]){heatN++;const v=lp[x][y];g+=`<circle class="m-heat" cx="${x-64}" cy="${192-y}" r="1.6" fill="${col}" opacity="${(.35+.65*v/mx).toFixed(2)}" data-tip="${esc(L(`0–10 хв · гравець був тут ${v} ${P(v,'раз|рази|разів')}`,`0–10 min · the player was here ${v} ${P(v,'','time|times')}`,`0–10 мин · игрок был здесь ${v} ${P(v,'','','раз|раза|раз')}`))}"/>`}}
+  if(Ly.route&&ev.length>1){
+    for(let i=1;i<ev.length;i++){const a=ev[i-1],b=ev[i];
+      const tip=esc(L(`Перехід ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (приблизно, по прямій)`,`Move ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (approximate, straight line)`,`Переход ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (примерно, по прямой)`));
+      g+=`<line class="m-route" x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" stroke="${col}"/><line class="m-hit" x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(b.x)}" y2="${Y(b.y)}" data-tip="${tip}"/>`}
+  }
+  for(const e of ev){
+    if(e.k==='death'){if(!Ly.deaths)continue;const cx=+X(e.x),cy=+Y(e.y);g+=`<g class="m-death" data-tip="${esc(e.tip)}"><circle cx="${cx}" cy="${cy}" r="2.6" fill="rgba(0,0,0,.55)"/><line x1="${cx-1.5}" y1="${cy-1.5}" x2="${cx+1.5}" y2="${cy+1.5}"/><line x1="${cx-1.5}" y1="${cy+1.5}" x2="${cx+1.5}" y2="${cy-1.5}"/></g>`}
+    else{if(!Ly.wards)continue;g+=`<circle class="${e.k==='obs'?'m-obs':'m-sen'}" cx="${X(e.x)}" cy="${Y(e.y)}" r="${e.k==='obs'?2.3:1.8}" data-tip="${esc(e.tip)}"/>`}
+  }
+  const nW=ev.filter(e=>e.k!=='death').length,nD=ev.filter(e=>e.k==='death').length;
+  const tb=(k,l)=>`<button type="button" data-mapt="${k}" class="${String(T)===String(k)?'on':''}">${l}</button>`;
+  const lb=(k,l)=>`<button type="button" data-mapl="${k}" class="${Ly[k]?'on':''}" aria-pressed="${!!Ly[k]}">${l}</button>`;
+  return `<div class="sec-h"><h3>${L('Карта','Map','Карта')} · ${esc(H(p))}</h3></div>
+  <div class="mapctl">
+    <div class="seg">${spans.map(m=>tb(m,`0–${m} ${L('хв','min','мин')}`)).join('')}${tb('all',`${L('Весь матч','Whole match','Весь матч')} (${mmss(dur)})`)}</div>
+    <div class="seg">${lb('heat',L('Позиції 0–10 хв','Positions 0–10 min','Позиции 0–10 мин'))}${lb('wards',`${L('Варди','Wards','Варды')} (${nW})`)}${lb('deaths',`${L('Смерті','Deaths','Смерти')} (${nD})`)}${lb('route',L('Маршрут','Route','Маршрут'))}</div>
+    <div class="swatches"><span>${L('Колір','Color','Цвет')}:</span>${MAPCOLORS.map(c=>`<button type="button" class="sw${c===col?' on':''}" data-mapc="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}<label class="sw-custom" title="${L('Свій колір','Custom color','Свой цвет')}"><input type="color" id="mapColor" value="${col}" aria-label="${L('Свій колір','Custom color','Свой цвет')}"></label></div>
+  </div>
+  <div class="mapwrap"><svg class="map" viewBox="0 0 128 128" role="img" aria-label="${L('Карта','Map','Карта')}"><image href="${MAPIMG}" x="0" y="0" width="128" height="128" preserveAspectRatio="none" class="m-img"/>${g}</svg>
+  <div class="maptip" id="mapTip">${L('Наведи або натисни на точку чи лінію, щоб побачити час.','Hover or tap a dot or line to see the time.','Наведи или нажми на точку или линию, чтобы увидеть время.')}</div>
+  <div class="note">${L('OpenDota записує позицію гравця щосекунди лише за перші 10 хвилин, і без часу (це «тепло» на карті). Далі відомі тільки точки, де є і місце, і час: де ставив варди і де помер у бійках. Лінія маршруту з’єднує ці точки по прямій, тому показує приблизний перехід, а не точний шлях. Повний рух по секундах є лише в STRATZ (потрібен особистий ключ).','OpenDota records the player’s position every second only for the first 10 minutes, without timestamps (the “heat” on the map). After that, only points with both place and time are known: where wards were placed and where the player died in fights. The route line connects these points in a straight line, so it shows an approximate move, not the exact path. Full second-by-second movement is only available from STRATZ (needs a personal key).','OpenDota записывает позицию игрока каждую секунду только за первые 10 минут и без времени (это «тепло» на карте). Дальше известны только точки, где есть и место, и время: где ставил варды и где умер в драках. Линия маршрута соединяет эти точки по прямой, поэтому показывает примерный переход, а не точный путь. Полное движение по секундам есть только в STRATZ (нужен личный ключ).')}</div></div>`;
 }
 
 /* профіль гравця */
