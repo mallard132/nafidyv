@@ -1181,23 +1181,23 @@ function stzOffset(p,pts){
 }
 function mapHtml(p){
   if(!S.parsed)return needParse();
-  const dur=S.dur,col=mapColor(),spans=[10,20,30,40].filter(m=>m*60<dur);
-  const T=spans.includes(S.mapT)?S.mapT:'all',lim=T==='all'?Infinity:T*60;
+  const dur=S.dur,col=mapColor(),spans=[0,10,20,30,40,50].filter(m=>m*60<dur);
+  const T=spans.includes(S.mapT)?S.mapT:'all',from=T==='all'||T===0?-Infinity:T*60,lim=T==='all'?Infinity:(T+10)*60,inR=t=>t>=from&&t<=lim,has010=T==='all'||T===0;
   const Ly=Object.assign({heat:1,wards:1,deaths:1,route:1,path:1},S.mapL);
   const key=stzKey(),mid=S.m.match_id;
   if(key&&!STZ[mid])loadStratz(mid).then(()=>{if(S&&S.m.match_id===mid&&S.tab==='map')renderTab()});
   const sz=key?STZ[mid]:null,raw=sz&&sz.players&&sz.players[p.player_slot];
   const off=[0,0];
-  const path=raw?raw.filter(q=>q[0]<=lim).map(q=>[q[0],q[1]+off[0],q[2]+off[1]]):null;
+  const path=raw?raw.filter(q=>inR(q[0])).map(q=>[q[0],q[1]+off[0],q[2]+off[1]]):null;
   S.mapPath=path;
   const obsN=L('обсервер','observer','обсервер'),senN=L('сентрі','sentry','сентри'),dthN=L('смерть','death','смерть');
   const what=e=>e.k==='obs'?obsN:e.k==='sen'?senN:dthN;
   const ev=[];
-  for(const w of(p.X.wards||[]))if(w.t<=lim)ev.push({t:w.t,x:w.x,y:w.y,k:w.type,tip:L(`${mmss(w.t)} · поставив ${w.type==='obs'?'обсервер':'сентрі'} · жив ${mmss(w.life)}${w.by?' · зніс '+w.by.n:''}`,`${mmss(w.t)} · placed ${w.type==='obs'?'an observer':'a sentry'} · lived ${mmss(w.life)}${w.by?' · destroyed by '+w.by.n:''}`,`${mmss(w.t)} · поставил ${w.type==='obs'?'обсервер':'сентри'} · жил ${mmss(w.life)}${w.by?' · снёс '+w.by.n:''}`)});
+  for(const w of(p.X.wards||[]))if(inR(w.t))ev.push({t:w.t,x:w.x,y:w.y,k:w.type,tip:L(`${mmss(w.t)} · поставив ${w.type==='obs'?'обсервер':'сентрі'} · жив ${mmss(w.life)}${w.by?' · зніс '+w.by.n:''}`,`${mmss(w.t)} · placed ${w.type==='obs'?'an observer':'a sentry'} · lived ${mmss(w.life)}${w.by?' · destroyed by '+w.by.n:''}`,`${mmss(w.t)} · поставил ${w.type==='obs'?'обсервер':'сентри'} · жил ${mmss(w.life)}${w.by?' · снёс '+w.by.n:''}`)});
   /* смерті: усі з журналу; місце — зі шляху STRATZ на момент смерті, інакше з координат бійки */
   const tfPos=(S.m.teamfights||[]).map(f=>{const x=f.players&&f.players[p.i],l=[];if(x&&x.deaths_pos)for(const px in x.deaths_pos)for(const py in x.deaths_pos[px])for(let k=0;k<x.deaths_pos[px][py];k++)l.push([+px,+py]);return{s:f.start,e:f.end,l}});
   const posAt=t=>{if(!raw||!raw.length)return null;let lo=0,hi=raw.length-1;if(raw[0][0]>t)return null;while(lo<hi){const m=(lo+hi+1)>>1;if(raw[m][0]<=t)lo=m;else hi=m-1}return raw[lo]};
-  const allD=(p.dl||[]).filter(d=>d.t<=lim);let noPos=0;
+  const allD=(p.dl||[]).filter(d=>inR(d.t));let noPos=0;
   for(const d of allD){
     let xy=null;const q=posAt(d.t);
     if(q)xy=[q[1],q[2]];
@@ -1210,7 +1210,7 @@ function mapHtml(p){
   const X=v=>(v-64).toFixed(1),Y=v=>(192-v).toFixed(1);
   let g='';
   const lp=p.lane_pos||{};
-  if(Ly.heat){let mx=1;for(const x in lp)for(const y in lp[x])mx=Math.max(mx,lp[x][y]);
+  if(Ly.heat&&has010){let mx=1;for(const x in lp)for(const y in lp[x])mx=Math.max(mx,lp[x][y]);
     for(const x in lp)for(const y in lp[x]){const v=lp[x][y];g+=`<circle class="m-heat" cx="${x-64}" cy="${192-y}" r="1.6" fill="${col}" opacity="${(.35+.65*v/mx).toFixed(2)}" data-tip="${esc(L(`0–10 хв · гравець був тут ${v} ${P(v,'раз|рази|разів')}`,`0–10 min · the player was here ${v} ${P(v,'','time|times')}`,`0–10 мин · игрок был здесь ${v} ${P(v,'','','раз|раза|раз')}`))}"/>`}}
   if(path&&path.length>1&&Ly.path){
     const tmax=path[path.length-1][0]||1;let seg=[],segT0=path[0][0];
@@ -1221,7 +1221,7 @@ function mapHtml(p){
         else if(Math.floor(q[0]/60)!==Math.floor(pr[0]/60)){seg.push(`${X(q[1])},${Y(q[2])}`);flush();segT0=q[0]}}
       seg.push(`${X(q[1])},${Y(q[2])}`)}
     flush();
-    for(let m=5;m*60<=Math.min(lim,tmax);m+=5){const q=path.find(z=>z[0]>=m*60);if(q)g+=`<g class="m-tick"><circle cx="${X(q[1])}" cy="${Y(q[2])}" r="1.7" fill="${col}"/><text x="${(+X(q[1])+2.2).toFixed(1)}" y="${(+Y(q[2])-1.6).toFixed(1)}">${m}′</text></g>`}
+    for(let m=5;m*60<=Math.min(lim,tmax);m+=5){if(m*60<from)continue;const q=path.find(z=>z[0]>=m*60);if(q)g+=`<g class="m-tick"><circle cx="${X(q[1])}" cy="${Y(q[2])}" r="1.7" fill="${col}"/><text x="${(+X(q[1])+2.2).toFixed(1)}" y="${(+Y(q[2])-1.6).toFixed(1)}">${m}′</text></g>`}
   }else if(Ly.route&&ev.length>1){
     for(let i=1;i<ev.length;i++){const a=ev[i-1],b=ev[i];
       const tip=esc(L(`Перехід ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (приблизно, по прямій)`,`Move ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (approximate, straight line)`,`Переход ${mmss(a.t)} → ${mmss(b.t)}: ${what(a)} → ${what(b)} (примерно, по прямой)`));
@@ -1246,7 +1246,7 @@ function mapHtml(p){
   return `<div class="sec-h"><h3>${L('Карта','Map','Карта')} · ${esc(H(p))}</h3></div>
   ${stzBlock}
   <div class="mapctl">
-    <div class="seg">${spans.map(m=>tb(m,`0–${m} ${L('хв','min','мин')}`)).join('')}${tb('all',`${L('Весь матч','Whole match','Весь матч')} (${mmss(dur)})`)}</div>
+    <div class="seg">${spans.map(m=>tb(m,`${m}–${m+10} ${L('хв','min','мин')}`)).join('')}${tb('all',`${L('Весь матч','Whole match','Весь матч')} (${mmss(dur)})`)}</div>
     <div class="seg">${path?lb('path',L('Точний шлях','Exact path','Точный путь')):lb('route',L('Маршрут (приблизно)','Route (approximate)','Маршрут (примерно)'))}${lb('heat',L('Позиції 0–10 хв','Positions 0–10 min','Позиции 0–10 мин'))}${lb('wards',`${L('Варди','Wards','Варды')} (${nW})`)}${lb('deaths',`${L('Смерті','Deaths','Смерти')} (${nD}${nD<allD.length?'/'+allD.length:''})`)}</div>
     <div class="swatches"><span>${L('Колір','Color','Цвет')}:</span>${MAPCOLORS.map(c=>`<button type="button" class="sw${c===col?' on':''}" data-mapc="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}<label class="sw-custom" title="${L('Свій колір','Custom color','Свой цвет')}"><input type="color" id="mapColor" value="${col}" aria-label="${L('Свій колір','Custom color','Свой цвет')}"></label></div>
   </div>
