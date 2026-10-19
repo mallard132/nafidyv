@@ -251,6 +251,73 @@ details.how b{color:var(--soft)}
 footer{margin-top:36px;color:#5d6676;font-size:12px}
 footer a{color:inherit}
 
+/* вкладки досьє */
+.tabs{display:flex;gap:4px;overflow-x:auto;margin:30px 0 0;border-bottom:1px solid var(--line);scrollbar-width:thin}
+.tabs button{flex:none;background:none;border:0;border-bottom:2px solid transparent;padding:11px 12px;font:700 13px var(--f-body);color:var(--muted);white-space:nowrap}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{color:var(--text);border-bottom-color:var(--tape)}
+.tab-body{min-height:140px}
+.loading{color:var(--muted);font-size:14px;padding:16px 0}
+.loading::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--tape);margin-right:9px;animation:pulse 1s ease-in-out infinite}
+.skills{display:flex;flex-wrap:wrap;gap:6px}
+.sk{position:relative;width:40px;flex:none}
+.sk img{width:40px;height:40px;border-radius:6px;display:block;background:var(--panel2)}
+.sk span{position:absolute;left:3px;top:1px;font:700 10px var(--f-mono);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.talents{display:grid;gap:6px;margin-top:10px}
+.talent{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--soft);background:var(--panel2);border-radius:8px;padding:7px 10px}
+.talent b{font:700 11px var(--f-mono);color:var(--tape);flex:none}
+.itl{display:flex;flex-wrap:wrap;gap:8px}
+.itl div{display:flex;flex-direction:column;align-items:center;gap:3px;font:600 11px var(--f-mono);color:var(--muted);width:52px}
+.itl img{width:52px;height:38px;border-radius:5px;object-fit:cover;background:var(--panel2)}
+.stack{display:flex;height:16px;border-radius:6px;overflow:hidden;background:var(--ink);gap:2px}
+.stack i{display:block;height:100%}
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 14px;margin-top:10px;font-size:13px}
+.lg span{display:flex;align-items:center;gap:7px;min-width:0}
+.lg i{width:10px;height:10px;border-radius:3px;flex:none}
+.lg b{margin-left:auto;font:600 12px var(--f-mono);color:var(--muted);white-space:nowrap}
+.hbars{display:grid;gap:8px}
+.hbar{display:grid;grid-template-columns:150px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:13px}
+.hbar .who{display:flex;align-items:center;gap:7px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar img{width:34px;height:20px;border-radius:3px;object-fit:cover;flex:none}
+.hbar .bar{height:10px;background:var(--ink);border-radius:9px;overflow:hidden}
+.hbar .bar i{display:block;height:100%;width:var(--w);background:currentColor;border-radius:9px}
+.hbar .v{text-align:right;font:600 12px var(--f-mono);color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:0 28px}
+.mapwrap{max-width:560px}
+.map{display:block;width:100%;height:auto;border-radius:10px;background:#111}
+.m-heat{fill:var(--tape)}
+.m-obs{fill:#f5c443;stroke:#000;stroke-width:.4}
+.m-sen{fill:#5aa9ff;stroke:#000;stroke-width:.4}
+.m-dead{stroke:var(--t3);stroke-width:.9}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tiles div{background:var(--panel2);padding:10px 12px;min-width:0}
+.tiles small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tiles b{font:700 16px var(--f-mono)}
+.chat{display:grid;gap:3px;max-height:440px;overflow-y:auto;padding-right:4px}
+.msg{display:grid;grid-template-columns:44px 34px minmax(0,1fr);gap:8px;align-items:center;font-size:13.5px;padding:5px 6px;border-radius:6px}
+.msg.tox{background:rgba(240,71,74,.09)}
+.msg img{width:34px;height:20px;border-radius:3px;object-fit:cover}
+.msg .t{font:600 12px var(--f-mono);color:var(--muted)}
+.msg .tx{min-width:0;overflow-wrap:anywhere}
+.msg .tx b{font-weight:700;margin-right:6px}
+.msg .tx em{font-style:normal;color:var(--muted)}
+.draft{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:18px 28px}
+.dr-row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.dr-row>img{width:56px;height:32px;border-radius:5px;object-fit:cover}
+.dr-mu{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.dr-mu span{display:inline-flex;align-items:center;gap:3px;font:600 11px var(--f-mono);padding:2px 5px 2px 2px;border-radius:5px;background:var(--ink)}
+.dr-mu img{width:26px;height:15px;border-radius:2px;object-fit:cover}
+.bans{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;align-items:center;font-size:12px;color:var(--muted)}
+.bans img{width:44px;height:25px;border-radius:3px;object-fit:cover;filter:grayscale(1) brightness(.75)}
+.prof{display:flex;gap:14px;align-items:center;margin:20px 0 6px}
+.prof img{width:64px;height:64px;border-radius:10px;flex:none}
+.prof b{font:800 18px var(--f-display);overflow-wrap:anywhere}
+.prof a{color:inherit}
+.smurf{display:inline-block;font:800 13px var(--f-display);letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:8px;border:2px solid currentColor;margin:10px 0 12px}
+.heroes-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.heroes-row span{display:inline-flex;align-items:center;gap:5px;font:600 12px var(--f-mono);background:var(--panel2);border-radius:6px;padding:3px 8px 3px 3px}
+.heroes-row img{width:40px;height:23px;border-radius:4px;object-fit:cover}
+
 /* мобільна панель */
 .mbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;align-items:center;gap:10px;background:rgba(20,24,32,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
 .mbar .who{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:left}
@@ -314,6 +381,18 @@ footer a{color:inherit}
   .ep p{font-size:13.5px}
   .row{padding:8px}
   .seg button{padding:5px 11px}
+  .tabs{margin-top:24px}
+  .tabs button{padding:10px 10px;font-size:12.5px}
+  .hbar{grid-template-columns:112px minmax(0,1fr) 74px;gap:8px}
+  .hbar img{width:28px;height:17px}
+  .msg{grid-template-columns:38px 28px minmax(0,1fr);gap:6px;font-size:13px}
+  .msg img{width:28px;height:17px}
+  .sk,.sk img{width:34px}
+  .sk img{height:34px}
+  .lg{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dr-row{grid-template-columns:46px minmax(0,1fr) auto}
+  .dr-row>img{width:46px;height:26px}
 }
 </style>
 </head>
@@ -342,7 +421,9 @@ footer a{color:inherit}
     <div id="notice"></div>
     <section class="box" id="epBox"></section>
     <section class="box" id="matchBox"></section>
+    <section class="box" id="draftBox"></section>
     <section class="box" id="graphBox"></section>
+    <section class="box" id="chatBox"></section>
     <section class="box" id="teamsBox"></section>
     <details class="how">
       <summary data-i="howT"></summary>
@@ -426,7 +507,7 @@ function applyStatic(){
 }
 function setLang(l){
   if(l===LANG)return;LANG=l;store.set('nf_lang',l);applyStatic();renderChips();
-  if(S){const keep={sel:S.sel,epf:S.epf,gm:S.gm};S=analyze(S.m);Object.assign(S,keep);render()}
+  if(S){const keep={sel:S.sel,epf:S.epf,gm:S.gm,tab:S.tab,mapm:S.mapm};S=analyze(S.m);Object.assign(S,keep);render()}
   else if($('status').classList.contains('err'))setStatus('');
 }
 
@@ -478,9 +559,10 @@ const BENCH=()=>[['gold_per_min',L('Золото за хв','Gold per min','Зо
 const RUIN=()=>L('Руїнометр','Ruin meter','Руинометр');
 const SIDE=k=>k==='r'?'Radiant':'Dire';
 
-async function getJson(url,opt){
+async function getJson(url,opt,generic){
   let r;
-  try{r=await fetch(url,opt)}catch(e){throw new Error(L('Не вдалося зв’язатися з OpenDota. Перевір інтернет і спробуй ще раз.','Couldn’t reach OpenDota. Check your connection and try again.','Не удалось связаться с OpenDota. Проверь интернет и попробуй ещё раз.'))}
+  try{r=await fetch(url,opt||undefined)}catch(e){throw new Error(L('Не вдалося зв’язатися з OpenDota. Перевір інтернет і спробуй ще раз.','Couldn’t reach OpenDota. Check your connection and try again.','Не удалось связаться с OpenDota. Проверь интернет и попробуй ещё раз.'))}
+  if(r.status===404&&generic)throw new Error(L('OpenDota не має цих даних.','OpenDota has no data for this.','У OpenDota нет этих данных.'));
   if(r.status===404)throw new Error(L('Такого матчу OpenDota не знає. Перевір ID: це число на 10 цифр із Dotabuff, OpenDota або з історії матчів у грі.','OpenDota doesn’t know this match. Check the ID: it’s a 10-digit number from Dotabuff, OpenDota or the in-game match history.','Такого матча OpenDota не знает. Проверь ID: это число из 10 цифр с Dotabuff, OpenDota или из истории матчей в игре.'));
   if(r.status===429)throw new Error(L('OpenDota тимчасово обмежив кількість запитів. Зачекай хвилину й натисни ще раз.','OpenDota is limiting requests right now. Wait a minute and try again.','OpenDota временно ограничил число запросов. Подожди минуту и нажми ещё раз.'));
   if(!r.ok)throw new Error(L(`OpenDota відповів помилкою ${r.status}. Спробуй трохи пізніше.`,`OpenDota returned error ${r.status}. Try again a bit later.`,`OpenDota ответил ошибкой ${r.status}. Попробуй чуть позже.`));
@@ -556,6 +638,8 @@ function analyze(m){
     p.opp=p.enemy.find(e=>e.pos===OPP[p.pos])||null;
   }
   for(const p of P){p.dl=deathList(p,c);p.fed=p.dl&&p.dl.some(d=>d.fed!=null)?p.dl.reduce((a,d)=>a+(d.fed||0),0):null}
+  c.chat=chatList(c);
+  for(const p of P)p.X=extras(p,c);
   for(const p of P){p.A=aspects(p,c);finalize(p)}
   const losers=m.radiant_win?sides.d:sides.r,winners=m.radiant_win?sides.r:sides.d;
   c.culprit=[...losers].sort((a,b)=>b.ruin-a.ruin)[0];
@@ -583,6 +667,67 @@ function deathList(p,c){
     const bb=(p.buyback_log||[]).some(b=>t-b.time>=0&&t-b.time<=60);
     return{t,killer:HERO_BY_KEY[d.key]||null,fed:d.gold_fed!=null?d.gold_fed:null,lost:d.gold_lost||0,dead,trade,bld,fight,clean:!trade&&!bld&&!recentKill,lostB,bb};
   });
+}
+
+/* ---------- додаткові дані: предмети, золото, шкода, бійки, варди, чат ---------- */
+const KEY_ITEMS=['black_king_bar','glimmer_cape','force_staff','hurricane_pike','blink','overwhelming_blink','swift_blink','arcane_blink','manta','satanic','shivas_guard','refresher','sheepstick','orchid','bloodthorn','nullifier','abyssal_blade','lotus_orb','pipe','crimson_guard','mekansm','guardian_greaves','ghost','cyclone','wind_waker','solar_crest','heavens_halberd','silver_edge','invis_sword','diffusal_blade','disperser','harpoon','ethereal_blade','rod_of_atos','gungir','blade_mail','hand_of_midas','spirit_vessel','urn_of_shadows','holy_locket','boots_of_bearing','mjollnir','bloodstone','drum_of_endurance','pavise','meteor_hammer','eternal_shroud','helm_of_the_dominator','helm_of_the_overlord','dagon','arcane_boots','phase_boots','travel_boots','magic_wand'];
+const NO_FLAG=['magic_wand','phase_boots','arcane_boots','travel_boots','helm_of_the_dominator','helm_of_the_overlord'];
+const TOX=/(\bnoobs?\b|\bez\b|\breport|\bfuck|\bshit|\btrash\b|\bidiot|\bretard|\bstupid|\bkys\b|нуб|изи|ізі|репорт|бля|сука|сучк|пидор|підор|пидр|даун|дебил|дебіл|идиот|ідіот|уеб|ебан|ёбан|єбан|хуй|хуе|хуё|мать|мамк|мамаш|\bлох|долбо|ублюд|мразь|чмо|клоун|фидер|фідер|рукожоп|криворук)/i;
+const GG=/^\s*(gg|гг|ff|пп)(\s|$|!|\.)/i;
+const GR={13:'creep',14:'neutral',12:'hero',11:'building',15:'roshan',17:'rune'};
+const GOLDC={creep:'#6aa9ff',neutral:'#5bc98d',hero:'#f0474a',building:'#f2a23a',roshan:'#b48cff',rune:'#f5c443',other:'#6b7383'};
+const GOLDN=k=>({creep:L('Крипи на лініях','Lane creeps','Крипы на линиях'),neutral:L('Ліс','Jungle','Лес'),hero:L('Вбивства героїв','Hero kills','Убийства героев'),building:L('Будівлі','Buildings','Строения'),roshan:L('Рошан','Roshan','Рошан'),rune:L('Руни','Runes','Руны'),other:L('Пасивне та інше','Passive & other','Пассивное и другое')})[k];
+
+function chatList(c){
+  const bySlot={};c.P.forEach(p=>bySlot[p.player_slot]=p);
+  return (c.m.chat||[]).filter(e=>e.type==='chat'||e.type==='chatwheel').map(e=>{
+    const p=bySlot[e.player_slot]||(e.slot!=null?c.P[e.slot]:null),wheel=e.type==='chatwheel',text=String(e.key??'');
+    return{t:e.time,p,wheel,text,tox:!wheel&&TOX.test(text),gg:!wheel&&!!p&&!p.won&&GG.test(text)&&e.time<Math.min(1500,c.dur-180)};
+  }).filter(e=>e.p);
+}
+function fightRows(p,c){
+  const tf=c.m.teamfights;if(!Array.isArray(tf)||!tf.length)return null;
+  const bkb=(p.purchase_log||[]).find(e=>e.key==='black_king_bar');
+  return tf.map((f,idx)=>{
+    const x=f.players&&f.players[p.i];if(!x)return null;
+    const kills=Object.values(x.killed||{}).reduce((a,b)=>a+b,0),abil=Object.values(x.ability_uses||{}).reduce((a,b)=>a+b,0);
+    if(!(x.damage>0||x.healing>0||x.deaths>0||kills>0||abil>0))return null;
+    let myD=0,enD=0;f.players.forEach((y,j)=>{const q=c.P[j];if(!q||!y)return;if(q.rad===p.rad)myD+=y.deaths||0;else enD+=y.deaths||0});
+    const iu=x.item_uses||{};
+    return{start:f.start,end:f.end,myD,enD,won:enD>myD,dmg:x.damage||0,heal:x.healing||0,kills,died:x.deaths>0,gold:x.gold_delta||0,abil,items:Object.keys(iu),bkbIdle:!!bkb&&bkb.time<f.start&&!iu.black_king_bar&&x.deaths>0};
+  }).filter(Boolean);
+}
+function wardList(p,c){
+  if(!Array.isArray(p.obs_log)&&!Array.isArray(p.sen_log))return [];
+  const left={};for(const w of(p.obs_left_log||[]).concat(p.sen_left_log||[]))if(w.ehandle!=null)left[w.ehandle]=w;
+  const mk=(arr,type,life)=>(arr||[]).map(w=>{const l=w.ehandle!=null?left[w.ehandle]:null,d=(l?l.time:c.dur)-w.time;
+    return{type,x:w.x,y:w.y,t:w.time,life:Math.max(0,Math.min(d,life)),killed:!!(l&&l.attackername&&d<life-5),by:l&&l.attackername?HERO_BY_KEY[l.attackername]||null:null}});
+  return mk(p.obs_log,'obs',360).concat(mk(p.sen_log,'sen',420));
+}
+function extras(p,c){
+  const X={items:[],fights:null,wards:[],tox:0,toxT:null,gg:null,msgs:0};
+  if(Array.isArray(p.purchase_log)){
+    const uses=p.item_uses||{},seen=new Set();
+    for(const e of p.purchase_log){
+      if(!KEY_ITEMS.includes(e.key)||seen.has(e.key)||!ITEMK[e.key])continue;seen.add(e.key);
+      const own=Math.max(0,(c.dur-Math.max(0,e.time))/60),u=uses[e.key]||0,n=ITEMK[e.key].n,bt=mmss(e.time);let bad=false,txt='';
+      if(u===0&&own>=6&&!NO_FLAG.includes(e.key)){bad=true;txt=L(`Купив ${n} на ${bt} і жодного разу не використав.`,`Bought ${n} at ${bt} and never used it.`,`Купил ${n} на ${bt} и ни разу не использовал.`)}
+      else if(e.key==='hand_of_midas'&&own>=8&&u<own/1.5*.6){bad=true;txt=L(`${n}: лише ${u} використань за ${Math.round(own)} хв — Мідас треба тиснути кожні ~1,5 хв.`,`${n}: only ${u} uses in ${Math.round(own)} min — Midas should be used every ~1.5 min.`,`${n}: всего ${u} использований за ${Math.round(own)} мин — Мидас надо жать каждые ~1,5 мин.`)}
+      X.items.push({key:e.key,n,t:e.time,u,own,bad,badText:txt});
+    }
+  }
+  if(p.gold_reasons){
+    const g={creep:0,neutral:0,hero:0,building:0,roshan:0,rune:0,other:0};let lost=0;
+    for(const k in p.gold_reasons){const v=+p.gold_reasons[k]||0;if(k==='1'){lost+=Math.abs(v);continue}if(k==='2'||k==='6'||v<=0)continue;g[GR[k]||'other']+=v}
+    X.gold={g,total:Object.values(g).reduce((a,b)=>a+b,0),lost};
+  }
+  if(p.damage)X.dmgTo=p.enemy.map(e=>({e,v:p.damage[hero(e).key]||0})).sort((a,b)=>b.v-a.v);
+  if(p.damage_taken)X.dmgFrom=p.enemy.map(e=>({e,v:p.damage_taken[hero(e).key]||0})).sort((a,b)=>b.v-a.v);
+  X.fights=fightRows(p,c);
+  X.wards=wardList(p,c);
+  const my=c.chat.filter(e=>e.p===p),tx=my.filter(e=>e.tox);
+  X.msgs=my.length;X.tox=tx.length;X.toxT=tx[0]?tx[0].t:null;X.gg=my.find(e=>e.gg)||null;
+  return X;
 }
 
 function aspects(p,c){return{lane:aLane(p,c),deaths:aDeaths(p,c),farm:aFarm(p,c),fights:aFights(p,c),obj:aObj(p,c),vision:aVision(p,c),dec:aDec(p,c)}}
@@ -645,6 +790,12 @@ function aFarm(p,c){
   if(p.pos<=3||(l!=null&&l>.7))F.push({c:l!=null?(l<.3?'bad':l>.7?'good':'info'):'info',t:`${lh} ${P(lh,'добивання|добивання|добивань','last hit|last hits','добивание|добивания|добиваний')} (${dec(lh/min)} ${L('за хв','per min','в мин')})${l!=null?' — '+vsHero(l,p):''}.`});
   F.push({c:x!=null&&x<.3?'bad':x!=null&&x>.7?'good':'info',t:`XPM ${p.xp_per_min||0}, ${L('рівень','level','уровень')} ${p.level||'—'}${x!=null?' — '+vsHero(x,p):''}.`});
   F.push({c:p.pos<=3&&share<exp-.05?'bad':share>exp+.05?'good':'info',t:L(`${pct(share)} статків команди (${norm(p.pos,pct(exp))}).`,`${pct(share)} of team net worth (${norm(p.pos,pct(exp))}).`,`${pct(share)} богатства команды (${norm(p.pos,pct(exp))}).`)});
+  const G=p.X&&p.X.gold;
+  if(G&&G.total>0){
+    const ns=G.g.neutral/G.total,hs=G.g.hero/G.total,kpF=((p.kills||0)+(p.assists||0))/(tsum(p.team,'kills')||1);
+    if(p.pos<=3&&ns>=.4&&kpF<KP_NORM[p.pos]-.1){s=cl(s-6);F.push({c:'bad',t:L(`${pct(ns)} золота — з лісу, а участь у вбивствах лише ${pct(kpF)}: фармив ліс, поки команда билась.`,`${pct(ns)} of gold came from the jungle while kill participation was only ${pct(kpF)}: farmed the jungle while the team fought.`,`${pct(ns)} золота — из леса, а участие в убийствах всего ${pct(kpF)}: фармил лес, пока команда дралась.`)})}
+    else F.push({c:'info',t:L(`Золото: ${pct(G.g.creep/G.total)} — крипи на лініях, ${pct(ns)} — ліс, ${pct(hs)} — вбивства.`,`Gold: ${pct(G.g.creep/G.total)} lane creeps, ${pct(ns)} jungle, ${pct(hs)} kills.`,`Золото: ${pct(G.g.creep/G.total)} — крипы на линиях, ${pct(ns)} — лес, ${pct(hs)} — убийства.`)});
+  }
   let big=null;
   if(Array.isArray(p.purchase_log))big=p.purchase_log.find(e=>e.time>0&&ITEMK[e.key]&&ITEMK[e.key].cost>=2000&&ITEMK[e.key].asm&&!/recipe|ward|tome|smoke|dust|gem|cheese|aegis/.test(e.key));
   if(big){const late=BIG_LATE[p.pos]&&big.time>BIG_LATE[p.pos]*60,it=ITEMK[big.key].n;
@@ -658,7 +809,7 @@ function aFights(p,c){
   const tk=tsum(p.team,'kills')||1,kp=((p.kills||0)+(p.assists||0))/tk,ekp=KP_NORM[p.pos];
   const dmg=bp(p,'hero_damage_per_min'),kpm=bp(p,'kills_per_min'),apm=bp(p,'assists_per_min');
   const ds=(p.hero_damage||0)/(tsum(p.team,'hero_damage')||1),tfp=p.teamfight_participation;
-  const s=cl(avg([dmg!=null?dmg*100:null,cl(50+(kp-ekp)*160),tfp!=null?cl(tfp*90+10):null,avg([kpm,apm])!=null?avg([kpm,apm])*100:null])??50);
+  let s=cl(avg([dmg!=null?dmg*100:null,cl(50+(kp-ekp)*160),tfp!=null?cl(tfp*90+10):null,avg([kpm,apm])!=null?avg([kpm,apm])*100:null])??50);
   const F=[];
   F.push({c:kp<ekp-.12?'bad':kp>ekp+.1?'good':'info',t:L(`Участь у вбивствах ${pct(kp)} (${norm(p.pos,pct(ekp))}).`,`Kill participation ${pct(kp)} (${norm(p.pos,pct(ekp))}).`,`Участие в убийствах ${pct(kp)} (${norm(p.pos,pct(ekp))}).`)});
   F.push({c:dmg!=null?(dmg<.3?'bad':dmg>.7?'good':'info'):'info',t:L(`Шкода по героях ${num(p.hero_damage)} — ${pct(ds)} команди`,`Hero damage ${num(p.hero_damage)} — ${pct(ds)} of the team`,`Урон по героям ${num(p.hero_damage)} — ${pct(ds)} команды`)+(dmg!=null?'; '+vsHero(dmg,p,1):'')+'.'});
@@ -671,6 +822,12 @@ function aFights(p,c){
   const mk=Math.max(0,...Object.keys(p.multi_kills||{}).map(Number));
   if(mk>=3){const nm=L({3:'тріпл-кіл',4:'ультра-кіл',5:'рампага'},{3:'Triple Kill',4:'Ultra Kill',5:'Rampage'},{3:'трипл-килл',4:'ультра-килл',5:'рампага'})[Math.min(5,mk)];
     F.push({c:'good',t:L(`Найкращий мультикіл: ${nm}.`,`Best multikill: ${nm}.`,`Лучший мультикилл: ${nm}.`)})}
+  const idle=(p.X&&p.X.fights||[]).filter(f=>f.bkbIdle);
+  if(idle.length){const tt=idle.map(f=>mmss(f.start)).join(', ');s=cl(s-5*idle.length);
+    F.push({c:'bad',t:L(`У ${idle.length} ${P(idle.length,'бійці|бійках|бійках')} помер з BKB, не натиснувши його (${tt}).`,`Died in ${idle.length} ${P(idle.length,'','fight|fights')} with BKB and never pressed it (${tt}).`,`В ${idle.length} ${P(idle.length,'','','драке|драках|драках')} умер с BKB, не нажав его (${tt}).`)})}
+  const dt=p.X&&p.X.dmgTo;
+  if(dt&&dt.some(x=>x.v)){const tot=dt.reduce((a,x)=>a+x.v,0),cs=dt.filter(x=>x.e.pos<=3).reduce((a,x)=>a+x.v,0)/tot,top=dt[0];
+    F.push({c:p.pos<=3&&cs<.4?'bad':'info',t:L(`Найбільше шкоди — по ${H(top.e)} (${pct(top.v/tot)}); по ворожих корах — ${pct(cs)}.`,`Most damage went to ${H(top.e)} (${pct(top.v/tot)}); ${pct(cs)} to enemy cores.`,`Больше всего урона — по ${H(top.e)} (${pct(top.v/tot)}); по вражеским корам — ${pct(cs)}.`)})}
   return{s,F,stats:[[L('Участь','KP','Участие'),pct(kp)],[L('Шкода','Damage','Урон'),kfmt(p.hero_damage)],[L('Бійки','Fights','Драки'),tfp!=null?pct(tfp):'—']]};
 }
 
@@ -699,6 +856,11 @@ function aVision(p,c){
   if(st)F.push({c:st>=4?'good':'info',t:L(`Стакнув ${st} ${P(st,'табір|табори|таборів')}.`,`Stacked ${st} ${P(st,'','camp|camps')}.`,`Застакал ${st} ${P(st,'','','лагерь|лагеря|лагерей')}.`)});
   if(heal>=1000)F.push({c:'good',t:L(`Вилікував ${num(heal)} HP.`,`Healed ${num(heal)} HP.`,`Вылечил ${num(heal)} HP.`)});
   const sm=(p.item_uses||{}).smoke_of_deceit||0;if(sm)F.push({c:'info',t:L(`Використав смоук ${sm} ${TIMES(sm)}.`,`Used Smoke ${sm} ${TIMES(sm)}.`,`Использовал смок ${sm} ${TIMES(sm)}.`)});
+  const ow=(p.X&&p.X.wards||[]).filter(w=>w.type==='obs');
+  if(ow.length>=3){const k=ow.filter(w=>w.killed).length,kr=k/ow.length,al=ow.reduce((a,w)=>a+w.life,0)/ow.length;
+    if(kr>=.5){s=cl(s-8);F.push({c:'bad',t:L(`Вороги знесли ${k} з ${ow.length} обсерверів (${pct(kr)}), середнє життя ${mmss(al)} — варди в передбачуваних місцях.`,`The enemy destroyed ${k} of ${ow.length} observers (${pct(kr)}), average life ${mmss(al)} — predictable ward spots.`,`Враги снесли ${k} из ${ow.length} обсерверов (${pct(kr)}), средняя жизнь ${mmss(al)} — варды в предсказуемых местах.`)})}
+    else F.push({c:al>=240?'good':'info',t:L(`Обсервери жили в середньому ${mmss(al)} із 6:00, знесли ${k} з ${ow.length}.`,`Observers lived ${mmss(al)} on average out of 6:00; ${k} of ${ow.length} were destroyed.`,`Обсерверы жили в среднем ${mmss(al)} из 6:00, снесли ${k} из ${ow.length}.`)});
+  }
   return{s,F,stats:[[L('Варди','Wards','Варды'),obs+sen],[L('Девард','Dewards','Деварды'),dw],[L('Стаки','Stacks','Стаки'),st]]};
 }
 
@@ -715,6 +877,10 @@ function aDec(p,c){
   else if(tp10>=1.5){s+=6;F.push({c:'good',t:L(`${tp} телепортів — активно реагував на карту.`,`${tp} teleports — reacted to the map actively.`,`${tp} телепортов — активно реагировал на карту.`)})}
   if(!p.won&&(p.gold||0)>=2500){s-=6;F.push({c:'bad',t:L(`Закінчив програну гру з ${num(p.gold)} невитраченого золота.`,`Ended a lost game with ${num(p.gold)} unspent gold.`,`Закончил проигранную игру с ${num(p.gold)} непотраченного золота.`)})}
   const bb=(p.buyback_log||[]).length;if(bb&&!bbT.length)F.push({c:'info',t:L(`Байбеків: ${bb}, усі без повторної смерті.`,`Buybacks: ${bb}, none wasted.`,`Байбеков: ${bb}, все без повторной смерти.`)});
+  const X=p.X||{};
+  (X.items||[]).filter(i=>i.bad).slice(0,3).forEach(i=>{s-=6;F.push({c:'bad',t:i.badText})});
+  if(X.tox>=2){s-=Math.min(12,X.tox*3);F.push({c:'bad',t:`${X.tox} ${P(X.tox,'токсичне повідомлення|токсичні повідомлення|токсичних повідомлень','toxic chat message|toxic chat messages','токсичное сообщение|токсичных сообщения|токсичных сообщений')} ${L('у чаті','','в чате')}.`.replace(' .','.')})}
+  if(X.gg){s-=6;F.push({c:'bad',t:L(`Написав «${X.gg.text}» на ${mmss(X.gg.t)} — здався до кінця гри.`,`Typed “${X.gg.text}” at ${mmss(X.gg.t)} — gave up before the end.`,`Написал «${X.gg.text}» на ${mmss(X.gg.t)} — сдался до конца игры.`)})}
   if(!F.length)F.push({c:'info',t:L('Помітних помилок у рішеннях не знайдено.','No notable decision mistakes found.','Заметных ошибок в решениях не найдено.')});
   return{s:cl(s),F,stats:[['TP',tp],[L('Байбеки','Buybacks','Байбеки'),bb],[L('Дисконекти','Disconnects','Дисконнекты'),dc]]};
 }
@@ -754,6 +920,10 @@ function episodes(c){
       else if(d.lostB.some(b=>b.big))add({t:d.t,tone:'bad',tag:L('Поки лежав','While dead','Пока лежал'),p,txt:L(`${H(p)} помер на ${mmss(d.t)}${d.killer?` від ${d.killer.n}`:''}, і за ${d.dead} с на респавні команда втратила: ${names}.`,`${H(p)} died at ${mmss(d.t)}${d.killer?` to ${d.killer.n}`:''}, and during ${d.dead} s of respawn the team lost: ${names}.`,`${H(p)} умер на ${mmss(d.t)}${d.killer?` от ${d.killer.n}`:''}, и за ${d.dead} с на респавне команда потеряла: ${names}.`)});
     }
     (p.connection_log||[]).filter(e=>/discon/.test(e.event||'')).forEach(e=>add({t:e.time,tone:'bad',tag:L('Дисконект','Disconnect','Дисконнект'),p,txt:L(`${H(p)} (${pname(p)}) відключився від гри.`,`${H(p)} (${pname(p)}) disconnected from the game.`,`${H(p)} (${pname(p)}) отключился от игры.`)}));
+    for(const f of(p.X.fights||[]).filter(f=>f.bkbIdle))add({t:f.start,tone:'bad',tag:L('BKB у кишені','BKB unused','BKB в кармане'),p,txt:L(`${H(p)} помер у бійці на ${mmss(f.start)}, маючи BKB, і не натиснув його.`,`${H(p)} died in the fight at ${mmss(f.start)} with BKB and never pressed it.`,`${H(p)} умер в драке на ${mmss(f.start)} с BKB и не нажал его.`)});
+    if(p.X.gg)add({t:p.X.gg.t,tone:'bad',tag:L('Здався','Gave up','Сдался'),p,txt:L(`${pname(p)} (${H(p)}) написав «${p.X.gg.text}» на ${mmss(p.X.gg.t)}, хоча гра тривала до ${mmss(c.dur)}.`,`${pname(p)} (${H(p)}) typed “${p.X.gg.text}” at ${mmss(p.X.gg.t)} while the game went on until ${mmss(c.dur)}.`,`${pname(p)} (${H(p)}) написал «${p.X.gg.text}» на ${mmss(p.X.gg.t)}, хотя игра шла до ${mmss(c.dur)}.`)});
+    if(p.X.tox>=3)add({t:p.X.toxT,tone:'bad',tag:L('Токсик','Toxic','Токсик'),p,txt:L(`${pname(p)} (${H(p)}) — ${p.X.tox} токсичних повідомлень у чаті.`,`${pname(p)} (${H(p)}) — ${p.X.tox} toxic chat messages.`,`${pname(p)} (${H(p)}) — ${p.X.tox} токсичных сообщений в чате.`)});
+    for(const it of p.X.items.filter(i=>i.bad&&i.key==='black_king_bar'))add({t:it.t,tone:'bad',tag:L('BKB не вмикав','BKB never used','BKB не включал'),p,txt:it.badText});
     if(p.leaver)add({t:null,tone:'bad',tag:L('Лівер','Abandon','Ливер'),p,txt:L(`${H(p)} (${pname(p)}) покинув гру.`,`${H(p)} (${pname(p)}) abandoned the game.`,`${H(p)} (${pname(p)}) покинул игру.`)});
     for(const n of[5,4]){const t=killStreakTime(p,n);if(t!=null){const nm=n===5?L('рампагу','a Rampage','рампагу'):L('ультра-кіл','an Ultra Kill','ультра-килл');
       add({t,tone:'good',tag:n===5?L('Рампага','Rampage','Рампага'):L('Ультра-кіл','Ultra Kill','Ультра-килл'),p,txt:L(`${H(p)} зробив ${nm} на ${mmss(t)}.`,`${H(p)} got ${nm} at ${mmss(t)}.`,`${H(p)} сделал ${nm} на ${mmss(t)}.`)});break}}
@@ -782,7 +952,7 @@ function render(){
   $('tapeTxt').textContent=(L(`МІСЦЕ ФІДУ · МАТЧ ${m.match_id} · НЕ ПЕРЕТИНАТИ · `,`FEED SCENE · MATCH ${m.match_id} · DO NOT CROSS · `,`МЕСТО ФИДА · МАТЧ ${m.match_id} · НЕ ПЕРЕСЕКАТЬ · `)).repeat(12);
   $('notice').innerHTML=S.parsed?'':`<div class="notice"><p>${L('<b>Матч не розпарсений.</b> Поки що є лише фарм, бійки й будівлі в порівнянні з іншими гравцями на герої. Після парсингу додадуться лінія, деталі смертей (хто вбив, скільки золота віддано), вижен, рішення, епізоди та графік. Поки що позиції визначені приблизно, за статками.','<b>Match not parsed.</b> For now there’s only farm, fights and buildings compared with other players on the same hero. After parsing you also get lane, death details (who killed, how much gold was fed), vision, decisions, episodes and the graph. Positions are estimated from net worth for now.','<b>Матч не распарсен.</b> Пока есть только фарм, драки и строения в сравнении с другими игроками на герое. После парсинга добавятся линия, детали смертей (кто убил, сколько золота отдано), вижн, решения, эпизоды и график. Пока позиции определены примерно, по богатству.')}</p><button id="parseBtn" type="button">${L('Розпарсити на OpenDota','Parse on OpenDota','Распарсить на OpenDota')}</button></div>`;
   if(!S.parsed)$('parseBtn').onclick=requestParse;
-  renderDossier();renderEpisodes();renderMatch();renderGraph();renderTeams();renderBar();
+  renderDossier();renderEpisodes();renderMatch();renderDraft();renderGraph();renderChat();renderTeams();renderBar();
 }
 
 function topFacts(p){
@@ -838,14 +1008,228 @@ function renderDossier(){
     </div>
   </div>
   ${blameHtml()}
-  <div class="sec-h"><h3>${L('Розбір по аспектах','Breakdown by aspect','Разбор по аспектам')} · ${esc(H(p))}</h3><small>${L(`50 — норма для ${POS(p.pos)}, риска посередині шкали`,`50 = ${POS(p.pos)} norm, the tick mid-scale`,`50 — норма для ${POS(p.pos)}, риска посередине шкалы`)}</small></div>
-  <div class="aspects">${ASPECTS().map(([k,n,d])=>aspectCard(p,k,n,d,!mob||k===worstK)).join('')}</div>
-  <div class="two">
-    <div><div class="sec-h"><h3>${L(`Проти інших гравців на ${esc(H(p))}`,`Vs other ${esc(H(p))} players`,`Против других игроков на ${esc(H(p))}`)}</h3></div>${benchHtml(p)}</div>
-    <div><div class="sec-h"><h3>${L('Кожна смерть','Every death','Каждая смерть')}</h3><small>${p.deaths} ${DEATHS(p.deaths)}</small></div>${deathsHtml(p)}</div>
-  </div>`;
+  <div class="tabs" role="tablist" aria-label="${esc(H(p))}">${TABS().map(([k,n])=>`<button type="button" role="tab" data-tab="${k}">${n}</button>`).join('')}</div>
+  <div class="tab-body" id="tabBody" role="tabpanel"></div>`;
   if(!isC)$('backBtn').onclick=()=>select(S.culprit.i);
   $('dossier').querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>select(+b.dataset.sel));
+  $('dossier').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;renderTab();b.scrollIntoView({block:'nearest',inline:'center'})});
+  renderTab();
+}
+
+/* ---------- вкладки досьє ---------- */
+const TABS=()=>[['asp',L('Аспекти','Aspects','Аспекты')],['deaths',L('Смерті','Deaths','Смерти')],['items',L('Предмети й скіли','Items & skills','Предметы и скиллы')],['gold',L('Золото й шкода','Gold & damage','Золото и урон')],['fights',L('Бійки','Fights','Драки')],['map',L('Карта','Map','Карта')],['profile',L('Профіль гравця','Player profile','Профиль игрока')],['misc',L('Інше','Other','Другое')]];
+const MAPIMG='https://www.opendota.com/assets/images/dota2/map/detailed_740.webp';
+const loadingHtml=t=>`<div class="loading">${esc(t)}</div>`;
+const needParse=()=>`<div class="empty" style="padding-top:18px">${L('З’явиться після парсингу матчу (кнопка «Розпарсити на OpenDota» вище).','Available after the match is parsed (the “Parse on OpenDota” button above).','Появится после парсинга матча (кнопка «Распарсить на OpenDota» выше).')}</div>`;
+const noData=()=>`<div class="empty">${L('Немає даних.','No data.','Нет данных.')}</div>`;
+
+function renderTab(){
+  const el=$('tabBody');if(!el||!S)return;
+  const p=S.P[S.sel],t=S.tab||'asp';
+  $('dossier').querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+  let h;
+  if(t==='asp'){const mob=MOBILE(),wk=p.worst&&p.worst.k;
+    h=`<div class="sec-h"><h3>${L('Розбір по аспектах','Breakdown by aspect','Разбор по аспектам')} · ${esc(H(p))}</h3><small>${L(`50 — норма для ${POS(p.pos)}, риска посередині шкали`,`50 = ${POS(p.pos)} norm, the tick mid-scale`,`50 — норма для ${POS(p.pos)}, риска посередине шкалы`)}</small></div>
+    <div class="aspects">${ASPECTS().map(([k,n,d])=>aspectCard(p,k,n,d,!mob||k===wk)).join('')}</div>
+    <div class="sec-h"><h3>${L(`Проти інших гравців на ${esc(H(p))}`,`Vs other ${esc(H(p))} players`,`Против других игроков на ${esc(H(p))}`)}</h3></div>${benchHtml(p)}`}
+  else if(t==='deaths')h=`<div class="sec-h"><h3>${L('Кожна смерть','Every death','Каждая смерть')}</h3><small>${p.deaths} ${DEATHS(p.deaths)}</small></div>${deathsHtml(p)}`;
+  else if(t==='items')h=itemsHtml(p);
+  else if(t==='gold')h=goldHtml(p);
+  else if(t==='fights')h=fightsHtml(p);
+  else if(t==='map')h=mapHtml(p);
+  else if(t==='profile')h=profileHtml(p);
+  else h=miscHtml(p);
+  el.innerHTML=h;
+  el.querySelectorAll('[data-mapm]').forEach(b=>b.onclick=()=>{S.mapm=b.dataset.mapm;renderTab()});
+}
+
+/* предмети й скіли */
+let ABIL=null,abilP=null;
+function loadAbil(){
+  if(ABIL)return Promise.resolve();
+  if(abilP)return abilP;
+  const c=store.get('nf_abil_v2');if(c&&Date.now()-c.t<7*864e5){ABIL=c.a;return Promise.resolve()}
+  abilP=Promise.all([getJson(API+'/constants/ability_ids',null,true),getJson(API+'/constants/abilities',null,true)]).then(([ids,ab])=>{
+    const A={};for(const id in ids){const k=ids[id],a=ab[k];if(a)A[id]={n:String(a.dname||k).replace(/\{s:[^}]+\}/g,'X'),img:a.img||'',t:k.startsWith('special_bonus')?1:0}}
+    ABIL=A;store.set('nf_abil_v2',{t:Date.now(),a:A});
+  }).finally(()=>{abilP=null});
+  return abilP;
+}
+function itemsHtml(p){
+  if(!S.parsed)return needParse();
+  let h='';
+  const arr=p.ability_upgrades_arr||[];
+  h+=`<div class="sec-h"><h3>${L('Прокачка скілів','Skill build','Прокачка скиллов')}</h3></div>`;
+  if(!arr.length)h+=noData();
+  else if(!ABIL){h+=loadingHtml(L('Завантажую скіли…','Loading skills…','Загружаю скиллы…'));loadAbil().then(()=>{if(S&&S.tab==='items')renderTab()}).catch(()=>{})}
+  else{
+    h+=`<div class="skills">${arr.map((id,i)=>{const a=ABIL[id];if(a&&a.t)return '';return `<div class="sk" title="${esc((a?a.n:'#'+id)+' — '+L('рівень','level','уровень')+' '+(i+1))}"><img src="${a&&a.img?STEAM+a.img:''}" alt="${esc(a?a.n:'')}" onerror="this.style.visibility='hidden'"><span>${i+1}</span></div>`}).join('')}</div>`;
+    const tl=arr.map((id,i)=>({a:ABIL[id],l:i+1})).filter(x=>x.a&&x.a.t);
+    if(tl.length)h+=`<div class="talents">${tl.map(x=>`<div class="talent"><b>${L('рів.','lvl','ур.')} ${x.l}</b>${esc(x.a.n)}</div>`).join('')}</div>`;
+  }
+  const buys=(p.purchase_log||[]).filter(e=>{const it=ITEMK[e.key];return it&&!/recipe/.test(e.key)&&((it.asm&&it.cost>=1000)||(/boots/.test(e.key)&&it.cost>=500))});
+  h+=`<div class="sec-h"><h3>${L('Порядок предметів','Item order','Порядок предметов')}</h3><small>${L('тільки готові предмети від 1000 золота','completed items worth 1000+ only','только готовые предметы от 1000 золота')}</small></div>`;
+  h+=buys.length?`<div class="itl">${buys.map(e=>`<div title="${esc(ITEMK[e.key].n)}"><img src="${STEAM+ITEMK[e.key].img}" alt="${esc(ITEMK[e.key].n)}" onerror="this.style.visibility='hidden'">${mmss(e.time)}</div>`).join('')}</div>`:noData();
+  const its=p.X.items;
+  h+=`<div class="sec-h"><h3>${L('Як використовував активні предмети','Active item usage','Как использовал активные предметы')}</h3></div>`;
+  if(its.length){const hd=[L('Предмет','Item','Предмет'),L('Куплено','Bought','Куплен'),L('Натискань','Uses','Нажатий'),L('Висновок','Verdict','Вывод')];
+    h+=`<div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${its.map(i=>{const per=i.own>=1?i.u/(i.own/10):null;
+      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+ITEMK[i.key].img}" alt="">${esc(i.n)}</td><td class="mono" data-l="${hd[1]}">${mmss(i.t)}</td><td class="mono" data-l="${hd[2]}">${i.u}${per!=null?` <span style="color:var(--muted)">(${dec(per)} / 10 ${L('хв','min','мин')})</span>`:''}</td><td>${i.bad?`<span class="flag bad">${i.u?L('рідко','too rarely','редко'):L('не використав','never used','не использовал')}</span>`:`<span class="flag ok">${L('ок','ok','ок')}</span>`}</td></tr>`}).join('')}</tbody></table></div>`;
+    const bad=its.filter(i=>i.bad);if(bad.length)h+=`<ul class="facts" style="margin-top:12px">${bad.map(i=>`<li class="bad">${esc(i.badText)}</li>`).join('')}</ul>`;
+  }else h+=`<div class="empty">${L('Активних предметів не купував.','Bought no active items.','Активных предметов не покупал.')}</div>`;
+  const nh=p.neutral_item_history||[];
+  if(nh.length){h+=`<div class="sec-h"><h3>${L('Нейтральні предмети','Neutral items','Нейтральные предметы')}</h3></div><div class="itl">${nh.map(n=>{const it=ITEMK[n.item_neutral],en=n.item_neutral_enhancement&&ITEMK[n.item_neutral_enhancement];return it?`<div title="${esc(it.n+(en?' + '+en.n:''))}"><img src="${STEAM+it.img}" alt="${esc(it.n)}" onerror="this.style.visibility='hidden'">${mmss(n.time)}</div>`:''}).join('')}</div>`}
+  return h;
+}
+
+/* золото й шкода */
+function goldHtml(p){
+  if(!S.parsed)return needParse();
+  const X=p.X,G=X.gold;let h='';
+  h+=`<div class="sec-h"><h3>${L('Звідки золото','Where the gold came from','Откуда золото')}</h3>${G?`<small>${num(G.total)} ${L('зароблено','earned','заработано')}${G.lost?` · ${num(G.lost)} ${L('втрачено на смертях','lost on deaths','потеряно на смертях')}`:''}</small>`:''}</div>`;
+  if(G&&G.total){const ks=Object.keys(G.g).filter(k=>G.g[k]>0).sort((a,b)=>G.g[b]-G.g[a]);
+    h+=`<div class="stack">${ks.map(k=>`<i style="width:${(G.g[k]/G.total*100).toFixed(2)}%;background:${GOLDC[k]}" title="${esc(GOLDN(k))}"></i>`).join('')}</div><div class="lg">${ks.map(k=>`<span><i style="background:${GOLDC[k]}"></i>${GOLDN(k)}<b>${num(G.g[k])} · ${pct(G.g[k]/G.total)}</b></span>`).join('')}</div>`;
+  }else h+=noData();
+  const bars=(list,c)=>{const mx=Math.max(1,...list.map(x=>x.v)),tot=list.reduce((a,x)=>a+x.v,0)||1;
+    return `<div class="hbars">${list.map(x=>`<div class="hbar ${c}"><span class="who">${heroImg(x.e)?`<img src="${heroImg(x.e)}" alt="">`:''}${esc(H(x.e))}</span><span class="bar"><i style="--w:${(x.v/mx*100).toFixed(1)}%"></i></span><span class="v">${kfmt(x.v)} · ${pct(x.v/tot)}</span></div>`).join('')}</div>`};
+  const to=X.dmgTo&&X.dmgTo.some(x=>x.v)?X.dmgTo:null,fr=X.dmgFrom&&X.dmgFrom.some(x=>x.v)?X.dmgFrom:null;
+  let note='';if(to){const tot=to.reduce((a,x)=>a+x.v,0),cs=to.filter(x=>x.e.pos<=3).reduce((a,x)=>a+x.v,0)/tot;note=`<div class="note">${L(`${pct(cs)} шкоди — по ворожих корах (поз. 1–3), ${pct(1-cs)} — по сапортах.`,`${pct(cs)} of damage went to enemy cores (pos. 1–3), ${pct(1-cs)} to supports.`,`${pct(cs)} урона — по вражеским корам (поз. 1–3), ${pct(1-cs)} — по саппортам.`)}</div>`}
+  h+=`<div class="grid2"><div><div class="sec-h"><h3>${L('По кому бив','Damage dealt to','По кому бил')}</h3></div>${to?bars(to,'c3')+note:noData()}</div><div><div class="sec-h"><h3>${L('Хто бив його','Damage taken from','Кто бил его')}</h3></div>${fr?bars(fr,'c2'):noData()}</div></div>`;
+  return h;
+}
+
+/* бійки */
+function fightsHtml(p){
+  if(!S.parsed)return needParse();
+  const F=p.X.fights,all=(S.m.teamfights||[]).length;
+  if(!F||!F.length)return `<div class="empty" style="padding-top:18px">${L('Цей гравець не брав участі в командних бійках.','This player took no part in teamfights.','Этот игрок не участвовал в командных драках.')}</div>`;
+  const won=F.filter(f=>f.won).length;
+  const hd=[L('Бійка','Fight','Драка'),L('Підсумок','Result','Итог'),L('Шкода','Damage','Урон'),L('Вбив','Kills','Убил'),L('Золото','Gold','Золото'),L('Скіли · предмети','Spells · items','Скиллы · предметы'),''];
+  const skip=/tpscroll|ward_|tango|clarity|flask|faerie|enchanted_mango|branches|magic_stick|magic_wand|smoke|dust|bottle/;
+  return `<div class="sec-h"><h3>${L('Командні бійки','Teamfights','Командные драки')}</h3><small>${L(`був у ${F.length} з ${all}, команда виграла ${won}`,`in ${F.length} of ${all}, team won ${won}`,`был в ${F.length} из ${all}, команда выиграла ${won}`)}</small></div>
+  <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${F.map(f=>{
+    const even=f.enD===f.myD,res=`<span class="flag ${f.won?'ok':even?'info':'bad'}">${f.won?L('виграли','won','выиграли'):even?L('нічия','even','ничья'):L('програли','lost','проиграли')} ${f.enD}:${f.myD}</span>`;
+    const fl=[];if(f.died)fl.push(`<span class="flag bad">${L('помер','died','умер')}</span>`);if(f.bkbIdle)fl.push(`<span class="flag bad">${L('BKB не натиснув','BKB not used','BKB не нажал')}</span>`);if(!f.dmg&&!f.heal&&!f.kills)fl.push(`<span class="flag bad">${L('без шкоди','no damage','без урона')}</span>`);
+    const its=f.items.filter(k=>ITEMK[k]&&!skip.test(k)).map(k=>`<img src="${STEAM+ITEMK[k].img}" alt="${esc(ITEMK[k].n)}" title="${esc(ITEMK[k].n)}" style="width:24px;height:18px;margin:0 2px 0 0">`).join('');
+    return `<tr><td class="mono" data-l="${hd[0]}">${mmss(f.start)}–${mmss(f.end)}</td><td data-l="${hd[1]}">${res}</td><td class="mono" data-l="${hd[2]}">${num(f.dmg)}${f.heal?` <span class="c0">+${num(f.heal)}</span>`:''}</td><td class="mono" data-l="${hd[3]}">${f.kills}</td><td class="mono" data-l="${hd[4]}">${sgn(f.gold)}</td><td data-l="${hd[5]}"><span class="mono">${f.abil}</span> ${its}</td><td>${fl.join('')}</td></tr>`}).join('')}</tbody></table></div>
+  <div class="note">${L('«Підсумок» — скільки героїв втратила кожна сторона в цій бійці (вороги : ваші). «Скіли» — скільки разів натиснув здібності.','“Result” = heroes lost by each side in that fight (enemy : yours). “Spells” = how many times abilities were cast.','«Итог» — сколько героев потеряла каждая сторона в этой драке (враги : ваши). «Скиллы» — сколько раз нажал способности.')}</div>`;
+}
+
+/* карта */
+function mapHtml(p){
+  if(!S.parsed)return needParse();
+  const mode=S.mapm||'lane',Wd=p.X.wards||[];
+  let marks='',info;
+  if(mode==='lane'){
+    const lp=p.lane_pos||{};let mx=1;for(const x in lp)for(const y in lp[x])mx=Math.max(mx,lp[x][y]);
+    for(const x in lp)for(const y in lp[x])marks+=`<circle class="m-heat" cx="${x-64}" cy="${192-y}" r="1.5" opacity="${(.2+.8*lp[x][y]/mx).toFixed(2)}"/>`;
+    info=Object.keys(lp).length?L('Де стояв гравець у перші 10 хвилин: що яскравіше, то довше.','Where the player stood during the first 10 minutes: brighter means longer.','Где стоял игрок в первые 10 минут: чем ярче, тем дольше.'):L('Немає даних про позиції.','No position data.','Нет данных о позициях.');
+  }else{
+    for(const w of Wd){const nm=w.type==='obs'?L('Обсервер','Observer','Обсервер'):L('Сентрі','Sentry','Сентри');
+      marks+=`<circle class="${w.type==='obs'?'m-obs':'m-sen'}${w.killed?' m-dead':''}" cx="${(w.x-64).toFixed(1)}" cy="${(192-w.y).toFixed(1)}" r="${w.type==='obs'?2.3:1.8}"><title>${esc(`${nm} ${mmss(w.t)} · ${L('жив','lived','жил')} ${mmss(w.life)}${w.by?' · '+L('зніс','destroyed by','снёс')+' '+w.by.n:''}`)}</title></circle>`}
+    const o=Wd.filter(w=>w.type==='obs'),s=Wd.filter(w=>w.type==='sen'),k=o.filter(w=>w.killed).length;
+    info=L(`Жовті — обсервери (${o.length}, знесли ${k}), сині — сентрі (${s.length}). Червона обводка — вард знесли вороги. Наведи на точку, щоб побачити час.`,`Yellow = observers (${o.length}, ${k} destroyed), blue = sentries (${s.length}). Red outline = destroyed by the enemy. Hover a dot for timing.`,`Жёлтые — обсерверы (${o.length}, снесли ${k}), синие — сентри (${s.length}). Красная обводка — вард снесли враги. Наведи на точку, чтобы увидеть время.`);
+  }
+  return `<div class="sec-h"><h3>${L('Карта','Map','Карта')} · ${esc(H(p))}</h3><div class="seg"><button type="button" data-mapm="lane" class="${mode==='lane'?'on':''}">${L('Позиції до 10 хв','Positions 0–10 min','Позиции до 10 мин')}</button><button type="button" data-mapm="wards" class="${mode==='wards'?'on':''}">${L('Варди','Wards','Варды')} (${Wd.length})</button></div></div>
+  <div class="mapwrap"><svg class="map" viewBox="0 0 128 128" role="img" aria-label="${esc(info)}"><image href="${MAPIMG}" x="0" y="0" width="128" height="128" preserveAspectRatio="none"/>${marks}</svg><div class="note">${esc(info)}</div></div>`;
+}
+
+/* профіль гравця */
+const PROF={};
+async function loadProfile(id){
+  if(PROF[id])return;PROF[id]={loading:true};
+  try{const g=u=>getJson(API+u,null,true);
+    const [pr,wl,heroes,recent]=await Promise.all([g(`/players/${id}`),g(`/players/${id}/wl`),g(`/players/${id}/heroes`),g(`/players/${id}/recentMatches`)]);
+    PROF[id]={pr,wl,heroes,recent};
+  }catch(e){PROF[id]={err:e.message}}
+}
+function profileHtml(p){
+  if(!p.account_id)return `<div class="empty" style="padding-top:18px">${L('Гравець грає анонімно, тому його історія прихована.','This player is anonymous, so their history is hidden.','Игрок играет анонимно, поэтому его история скрыта.')}</div>`;
+  const id=p.account_id,d=PROF[id];
+  if(!d||d.loading){if(!d)loadProfile(id).then(()=>{if(S&&S.tab==='profile'&&S.P[S.sel].account_id===id)renderTab()});return loadingHtml(L('Завантажую історію гравця…','Loading player history…','Загружаю историю игрока…'))}
+  if(d.err)return `<div class="empty" style="padding-top:18px">${esc(d.err)}</div>`;
+  const prof=d.pr&&d.pr.profile||{},rt=d.pr&&d.pr.rank_tier||p.rank_tier||0,rk=rank(rt);
+  const total=(d.wl.win||0)+(d.wl.lose||0),wr=total?d.wl.win/total:null;
+  const hr=(Array.isArray(d.heroes)?d.heroes:[]).find(h=>+h.hero_id===p.hero_id),hg=hr?hr.games:0,hw=hr&&hr.games?hr.win/hr.games:null;
+  const rec=Array.isArray(d.recent)?d.recent:[],rw=rec.filter(r=>(r.player_slot<128)===r.radiant_win).length,rwr=rec.length?rw/rec.length:null;
+  const kda=rec.length?[avg(rec.map(r=>r.kills)),avg(rec.map(r=>r.deaths)),avg(rec.map(r=>r.assists))]:null;
+  const top=Object.entries(rec.reduce((a,r)=>(a[r.hero_id]=(a[r.hero_id]||0)+1,a),{})).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const sig=[];
+  if(total>0&&total<250&&rt>=50)sig.push(L(`Лише ${total} ігор на акаунті при ранзі ${rk.n}.`,`Only ${total} games on the account at ${rk.n}.`,`Всего ${total} игр на аккаунте при ранге ${rk.n}.`));
+  if(rec.length>=15&&rwr>=.7)sig.push(L(`Вінрейт ${pct(rwr)} в останніх ${rec.length} іграх.`,`${pct(rwr)} win rate over the last ${rec.length} games.`,`Винрейт ${pct(rwr)} в последних ${rec.length} играх.`));
+  if(total>0&&hg<=10&&bp(p,'gold_per_min')>.85&&bp(p,'hero_damage_per_min')>.85)sig.push(L(`Лише ${hg} ігор на ${H(p)}, але фарм і шкода кращі, ніж у 85% гравців на ньому.`,`Only ${hg} games on ${H(p)}, yet farm and damage beat 85% of its players.`,`Всего ${hg} игр на ${H(p)}, но фарм и урон лучше, чем у 85% игроков на нём.`));
+  const v=total===0?{t:L('Статистика прихована','Stats hidden','Статистика скрыта'),c:1}:sig.length>=2?{t:L('Схоже на смурфа','Looks like a smurf','Похоже на смурфа'),c:3}:sig.length?{t:L('Можливо, смурф','Possible smurf','Возможно, смурф'),c:2}:{t:L('Звичайний акаунт','Regular account','Обычный аккаунт'),c:0};
+  const tiles=[[L('Ігор усього','Total games','Всего игр'),total?num(total):'—'],[L('Вінрейт','Win rate','Винрейт'),wr!=null?pct(wr):'—'],[L(`Ігор на ${H(p)}`,`Games on ${H(p)}`,`Игр на ${H(p)}`),total?hg:'—'],[L('Вінрейт на герої','Hero win rate','Винрейт на герое'),hw!=null?pct(hw):'—'],[L(`Останні ${rec.length||20}: вінрейт`,`Last ${rec.length||20}: win rate`,`Последние ${rec.length||20}: винрейт`),rwr!=null?pct(rwr):'—'],[L('Середнє K/D/A','Average K/D/A','Среднее K/D/A'),kda?kda.map(x=>dec(x)).join('/'):'—']];
+  return `<div class="prof">${prof.avatarfull?`<img src="${esc(prof.avatarfull)}" alt="">`:''}<div><b><a href="https://www.opendota.com/players/${id}" target="_blank" rel="noopener">${esc(prof.personaname||pname(p))}</a></b><div class="who-line" style="margin:4px 0 0">${rk?`<span class="rank"><img src="${rk.img}" alt="" onerror="this.remove()">${rk.n}</span>`:''}${hr&&hr.last_played?`<span>${L('на цьому герої востаннє','last played this hero','на этом герое последний раз')}: ${new Date(hr.last_played*1000).toLocaleDateString(LOC[LANG])}</span>`:''}</div></div></div>
+  <div class="smurf c${v.c}">${v.t}</div>
+  ${sig.length?`<ul class="facts" style="margin-bottom:14px">${sig.map(s=>`<li class="bad">${esc(s)}</li>`).join('')}</ul>`:''}
+  ${hg<=3&&total>0?`<ul class="facts" style="margin-bottom:14px"><li class="info">${esc(L(`Одна з перших ігор на ${H(p)} (${hg} усього) — частина помилок може бути через незнання героя.`,`One of the first games on ${H(p)} (${hg} total) — some mistakes may come from not knowing the hero.`,`Одна из первых игр на ${H(p)} (${hg} всего) — часть ошибок может быть из-за незнания героя.`))}</li></ul>`:''}
+  <div class="tiles">${tiles.map(([l,x])=>`<div><small>${esc(l)}</small><b>${esc(x)}</b></div>`).join('')}</div>
+  ${top.length?`<div class="sec-h"><h3>${L('Що грав останнім часом','Recently played','Что играл последнее время')}</h3></div><div class="heroes-row">${top.map(([hid,n])=>{const hh=HEROES[hid];return hh?`<span><img src="${STEAM+hh.img}" alt="">${esc(hh.n)} ×${n}</span>`:''}).join('')}</div>`:''}
+  <div class="note">${L('Оцінка «смурф» — це евристика за кількістю ігор, рангом і вінрейтом, а не доказ. Дані видно, лише якщо гравець відкрив статистику матчів у налаштуваннях Dota.','The smurf rating is a heuristic based on games played, rank and win rate, not proof. Data is visible only if the player made their match data public in Dota settings.','Оценка «смурф» — это эвристика по количеству игр, рангу и винрейту, а не доказательство. Данные видны, только если игрок открыл статистику матчей в настройках Dota.')}</div>`;
+}
+
+/* інше */
+const RUNE=()=>L({0:'Подвійна шкода',1:'Прискорення',2:'Ілюзії',3:'Невидимість',4:'Регенерація',5:'Баунті',6:'Чародійство',7:'Вода',8:'Мудрість',9:'Щит'},{0:'Double Damage',1:'Haste',2:'Illusion',3:'Invisibility',4:'Regeneration',5:'Bounty',6:'Arcane',7:'Water',8:'Wisdom',9:'Shield'},{0:'Двойной урон',1:'Ускорение',2:'Иллюзии',3:'Невидимость',4:'Регенерация',5:'Баунти',6:'Чародейство',7:'Вода',8:'Мудрость',9:'Щит'});
+function miscHtml(p){
+  const iu=p.item_uses||{},pc=p.purchase||{},runes=p.runes||{},rTot=Object.values(runes).reduce((a,b)=>a+b,0),pp=S.parsed;
+  const ks=Math.max(0,...Object.keys(p.kill_streaks||{}).map(Number)),mk=Math.max(0,...Object.keys(p.multi_kills||{}).map(Number));
+  const yes=L('так','yes','да');
+  const tiles=[[L('Дій за хвилину (APM)','Actions per min (APM)','Действий в минуту (APM)'),p.actions_per_min??'—'],[L('Пінги','Pings','Пинги'),p.pings??'—'],[L('Повідомлень у чаті','Chat messages','Сообщений в чате'),pp?p.X.msgs:'—'],[L('Підібрав рун','Runes picked','Подобрал рун'),pp?rTot:'—'],[L('Вбив кур’єрів','Couriers killed','Убил курьеров'),p.courier_kills??'—'],[L('Стакнув таборів','Camps stacked','Застакал лагерей'),p.camps_stacked??'—'],[L('Байбеки','Buybacks','Байбеки'),p.buyback_count??(p.buyback_log||[]).length],[L('Куплено обс. / сентрі','Obs / sentries bought','Куплено обс. / сентри'),pp?`${pc.ward_observer||0} / ${pc.ward_sentry||0}`:'—'],[L('Смоуки / даст','Smokes / dust','Смоки / даст'),pp?`${iu.smoke_of_deceit||0} / ${iu.dust||0}`:'—'],[L('TP використано','TPs used','ТП использовано'),pp?(iu.tpscroll||0):'—'],[L('Найкраща серія вбивств','Best kill streak','Лучшая серия убийств'),ks||'—'],[L('Мультикіл','Best multikill','Мультикилл'),mk>=2?mk:'—'],[L('Перша кров','First blood','Первая кровь'),p.firstblood_claimed?yes:'—'],[L('Добивання / денаї','Last hits / denies','Добивания / денаи'),`${p.last_hits||0} / ${p.denies||0}`],[L('Ліс: убито нейтралів','Neutrals killed','Убито нейтралов'),p.neutral_kills??'—'],[L('Шкода по вежах','Tower damage','Урон по башням'),num(p.tower_damage)]];
+  let h=`<div class="sec-h"><h3>${L('Інша статистика','Other stats','Другая статистика')}</h3></div><div class="tiles">${tiles.map(([l,x])=>`<div><small>${esc(l)}</small><b>${esc(x)}</b></div>`).join('')}</div>`;
+  if(rTot)h+=`<div class="sec-h"><h3>${L('Руни','Runes','Руны')}</h3></div><div class="heroes-row">${Object.entries(runes).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span style="padding:4px 10px">${esc(RUNE()[k]||'#'+k)} ×${n}</span>`).join('')}</div>`;
+  const my=(S.chat||[]).filter(e=>e.p===p);
+  if(my.length){if(my.some(e=>e.wheel)&&!CW)loadCW().then(()=>{if(S&&S.tab==='misc')renderTab()}).catch(()=>{});
+    h+=`<div class="sec-h"><h3>${L('Що писав у чат','What they wrote in chat','Что писал в чат')}</h3></div><div class="chat">${my.map(msgHtml).join('')}</div>`}
+  return h;
+}
+
+/* чат і драфт матчу */
+let CW=null,cwP=null;
+function loadCW(){
+  if(CW)return Promise.resolve();if(cwP)return cwP;
+  const c=store.get('nf_cw_v1');if(c&&Date.now()-c.t<14*864e5){CW=c.w;return Promise.resolve()}
+  cwP=getJson(API+'/constants/chat_wheel',null,true).then(w=>{const o={};for(const k in w)o[k]=w[k].message||w[k].label||'';CW=o;store.set('nf_cw_v1',{t:Date.now(),w:o})}).finally(()=>{cwP=null});
+  return cwP;
+}
+function msgHtml(e){
+  const p=e.p,txt=e.wheel?`<em>[${L('чат-колесо','chat wheel','чат-колесо')}]</em> ${esc(CW&&CW[e.text]||'')}`:esc(e.text);
+  return `<div class="msg${e.tox?' tox':''}"><span class="t">${mmss(e.t)}</span>${heroImg(p)?`<img src="${heroImg(p)}" alt="${esc(H(p))}">`:'<span></span>'}<span class="tx"><b style="color:${p.rad?'var(--rad)':'var(--dire)'}">${esc(pname(p))}</b>${txt}${e.tox?` <span class="flag bad">${L('токсик','toxic','токсик')}</span>`:''}${e.gg?` <span class="flag bad">${L('здався','gave up','сдался')}</span>`:''}</span></div>`;
+}
+function renderChat(){
+  const box=$('chatBox'),list=S.chat||[];
+  if(!S.parsed||!list.length){box.hidden=true;return}
+  box.hidden=false;
+  if(list.some(e=>e.wheel)&&!CW)loadCW().then(()=>{if(S)renderChat()}).catch(()=>{});
+  const tox=list.filter(e=>e.tox).length;
+  box.innerHTML=`<div class="box-h"><h2>${L('Чат матчу','Match chat','Чат матча')}</h2><small>${list.length} ${P(list.length,'повідомлення|повідомлення|повідомлень','message|messages','сообщение|сообщения|сообщений')}${tox?` · ${L('токсичних','toxic','токсичных')}: ${tox}`:''}</small></div><div class="chat">${list.map(msgHtml).join('')}</div>`;
+}
+let MU=null;const MU_LOAD=new Set();
+const muC=()=>MU||(MU=store.get('nf_mu_v1')||{});
+const muFresh=id=>{const m=muC()[id];return m&&Date.now()-m.t<5*864e5};
+async function loadMatchups(ids){
+  const mu=muC(),need=ids.filter(id=>!muFresh(id)&&!MU_LOAD.has(id));
+  need.forEach(id=>MU_LOAD.add(id));
+  await Promise.all(need.map(async id=>{try{const r=await getJson(API+`/heroes/${id}/matchups`,null,true);const m={};for(const x of r)m[x.hero_id]=[x.games_played,x.wins];mu[id]={t:Date.now(),m}}catch(e){}finally{MU_LOAD.delete(id)}}));
+  store.set('nf_mu_v1',mu);
+}
+function renderDraft(){
+  const box=$('draftBox'),m=S.m,ids=S.P.map(p=>p.hero_id).filter(Boolean),mu=muC(),ready=ids.every(muFresh);
+  if(!ready&&!ids.some(id=>MU_LOAD.has(id)))loadMatchups(ids).then(()=>{if(S&&S.m===m)renderDraft()});
+  const side=k=>{const t=S.sides[k].slice().sort((a,b)=>a.pos-b.pos);let sum=0,cnt=0;
+    const rows=t.map(p=>{const mm=mu[p.hero_id]&&mu[p.hero_id].m||{};
+      const vs=p.enemy.map(e=>{const r=mm[e.hero_id];return r&&r[0]>=5?{e,wr:r[1]/r[0],g:r[0]}:{e,wr:null,g:r?r[0]:0}});
+      const v=vs.filter(x=>x.wr!=null),g=v.reduce((a,x)=>a+x.g,0),a=g?v.reduce((s,x)=>s+x.wr*x.g,0)/g:null;if(a!=null){sum+=a;cnt++}
+      return `<div class="dr-row"><img src="${heroImg(p)}" alt=""><div style="min-width:0"><b>${esc(H(p))}</b> <small style="color:var(--muted)">${POSS()} ${p.pos}</small><div class="dr-mu">${vs.map(x=>`<span title="${esc(H(p)+' vs '+H(x.e)+(x.wr!=null?': '+pct(x.wr)+' ('+x.g+')':''))}"><img src="${heroImg(x.e)}" alt="${esc(H(x.e))}"><b class="${x.wr==null?'':x.wr>=.53?'c0':x.wr<=.47?'c3':''}">${x.wr==null?'—':Math.round(x.wr*100)}</b></span>`).join('')}</div></div><b class="mono ${a==null?'':a>=.52?'c0':a<=.48?'c3':''}">${a==null?'—':dec(a*100)+'%'}</b></div>`});
+    return{rows,avg:cnt?sum/cnt:null}};
+  const r=side('r'),d=side('d');
+  let sum='';
+  if(r.avg!=null&&d.avg!=null){const df=(r.avg-d.avg)*100;sum=Math.abs(df)<1?L('Драфти приблизно рівні','Drafts are roughly even','Драфты примерно равны'):L(`Кращий драфт за матчапами: ${df>0?'Radiant':'Dire'} (+${dec(Math.abs(df))} п.п.)`,`Better draft by matchups: ${df>0?'Radiant':'Dire'} (+${dec(Math.abs(df))} pts)`,`Лучший драфт по матчапам: ${df>0?'Radiant':'Dire'} (+${dec(Math.abs(df))} п.п.)`)}
+  const bans=t=>{const b=(m.picks_bans||[]).filter(x=>!x.is_pick&&x.team===t);return b.length?`<div class="bans">${L('Бани','Bans','Баны')}: ${b.map(x=>{const hh=HEROES[x.hero_id];return hh?`<img src="${STEAM+hh.img}" alt="${esc(hh.n)}" title="${esc(hh.n)}">`:''}).join('')}</div>`:''};
+  const won=k=>((k==='r')===!!m.radiant_win)?` <small style="color:var(--muted)">${L('перемогли','won','победили')}</small>`:'';
+  box.innerHTML=`<div class="box-h"><h2>${L('Драфт','Draft','Драфт')}</h2><small>${sum||''}</small></div>${!ready?loadingHtml(L('Рахую матчапи героїв…','Calculating hero matchups…','Считаю матчапы героев…')):''}
+  <div class="draft"><div><div class="team-h"><span class="pill r">Radiant</span>${won('r')}</div>${r.rows.join('')}${bans(0)}</div><div><div class="team-h"><span class="pill d">Dire</span>${won('d')}</div>${d.rows.join('')}${bans(1)}</div></div>
+  <div class="note">${L('Число біля ворожого героя — як часто цей герой перемагає проти нього за статистикою OpenDota. Праворуч — середнє проти всієї ворожої п’ятірки. Зелене — вигідний матчап, червоне — невигідний.','The number next to each enemy is how often this hero wins against it per OpenDota stats. On the right is the average against the whole enemy five. Green = favourable, red = unfavourable.','Число возле вражеского героя — как часто этот герой побеждает против него по статистике OpenDota. Справа — среднее против всей вражеской пятёрки. Зелёное — выгодный матчап, красное — невыгодный.')}</div>`;
 }
 
 function aspectCard(p,k,n,d,open){
