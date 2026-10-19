@@ -1194,9 +1194,17 @@ function mapHtml(p){
   const what=e=>e.k==='obs'?obsN:e.k==='sen'?senN:dthN;
   const ev=[];
   for(const w of(p.X.wards||[]))if(w.t<=lim)ev.push({t:w.t,x:w.x,y:w.y,k:w.type,tip:L(`${mmss(w.t)} · поставив ${w.type==='obs'?'обсервер':'сентрі'} · жив ${mmss(w.life)}${w.by?' · зніс '+w.by.n:''}`,`${mmss(w.t)} · placed ${w.type==='obs'?'an observer':'a sentry'} · lived ${mmss(w.life)}${w.by?' · destroyed by '+w.by.n:''}`,`${mmss(w.t)} · поставил ${w.type==='obs'?'обсервер':'сентри'} · жил ${mmss(w.life)}${w.by?' · снёс '+w.by.n:''}`)});
-  for(const f of(S.m.teamfights||[])){
-    const x=f.players&&f.players[p.i];if(!x||!x.deaths_pos||f.start>lim)continue;
-    for(const px in x.deaths_pos)for(const py in x.deaths_pos[px])ev.push({t:f.start,x:+px,y:+py,k:'death',tip:L(`${mmss(f.start)}–${mmss(f.end)} · помер у бійці`,`${mmss(f.start)}–${mmss(f.end)} · died in a teamfight`,`${mmss(f.start)}–${mmss(f.end)} · умер в драке`)});
+  /* смерті: усі з журналу; місце — зі шляху STRATZ на момент смерті, інакше з координат бійки */
+  const tfPos=(S.m.teamfights||[]).map(f=>{const x=f.players&&f.players[p.i],l=[];if(x&&x.deaths_pos)for(const px in x.deaths_pos)for(const py in x.deaths_pos[px])for(let k=0;k<x.deaths_pos[px][py];k++)l.push([+px,+py]);return{s:f.start,e:f.end,l}});
+  const posAt=t=>{if(!raw||!raw.length)return null;let lo=0,hi=raw.length-1;if(raw[0][0]>t)return null;while(lo<hi){const m=(lo+hi+1)>>1;if(raw[m][0]<=t)lo=m;else hi=m-1}return raw[lo]};
+  const allD=(p.dl||[]).filter(d=>d.t<=lim);let noPos=0;
+  for(const d of allD){
+    let xy=null;const q=posAt(d.t);
+    if(q)xy=[q[1],q[2]];
+    else{const f=tfPos.find(f=>d.t>=f.s-3&&d.t<=f.e+3&&f.l.length);if(f)xy=f.l.shift()}
+    if(!xy){noPos++;continue}
+    const kl=d.killer?d.killer.n:L('кріпи / вежа','creeps / tower','крипы / башня');
+    ev.push({t:d.t,x:xy[0],y:xy[1],k:'death',tip:L(`${mmss(d.t)} · помер від ${kl}${d.fed!=null?` · віддав ${num(d.fed)} золота`:''}${d.fight?' · у бійці':' · поза бійкою'}`,`${mmss(d.t)} · killed by ${kl}${d.fed!=null?` · fed ${num(d.fed)} gold`:''}${d.fight?' · in a teamfight':' · outside fights'}`,`${mmss(d.t)} · умер от ${kl}${d.fed!=null?` · отдал ${num(d.fed)} золота`:''}${d.fight?' · в драке':' · вне драк'}`)});
   }
   ev.sort((a,b)=>a.t-b.t);
   const X=v=>(v-64).toFixed(1),Y=v=>(192-v).toFixed(1);
@@ -1239,9 +1247,10 @@ function mapHtml(p){
   ${stzBlock}
   <div class="mapctl">
     <div class="seg">${spans.map(m=>tb(m,`0–${m} ${L('хв','min','мин')}`)).join('')}${tb('all',`${L('Весь матч','Whole match','Весь матч')} (${mmss(dur)})`)}</div>
-    <div class="seg">${path?lb('path',L('Точний шлях','Exact path','Точный путь')):lb('route',L('Маршрут (приблизно)','Route (approximate)','Маршрут (примерно)'))}${lb('heat',L('Позиції 0–10 хв','Positions 0–10 min','Позиции 0–10 мин'))}${lb('wards',`${L('Варди','Wards','Варды')} (${nW})`)}${lb('deaths',`${L('Смерті','Deaths','Смерти')} (${nD})`)}</div>
+    <div class="seg">${path?lb('path',L('Точний шлях','Exact path','Точный путь')):lb('route',L('Маршрут (приблизно)','Route (approximate)','Маршрут (примерно)'))}${lb('heat',L('Позиції 0–10 хв','Positions 0–10 min','Позиции 0–10 мин'))}${lb('wards',`${L('Варди','Wards','Варды')} (${nW})`)}${lb('deaths',`${L('Смерті','Deaths','Смерти')} (${nD}${nD<allD.length?'/'+allD.length:''})`)}</div>
     <div class="swatches"><span>${L('Колір','Color','Цвет')}:</span>${MAPCOLORS.map(c=>`<button type="button" class="sw${c===col?' on':''}" data-mapc="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}<label class="sw-custom" title="${L('Свій колір','Custom color','Свой цвет')}"><input type="color" id="mapColor" value="${col}" aria-label="${L('Свій колір','Custom color','Свой цвет')}"></label></div>
   </div>
+  ${noPos&&Ly.deaths?`<div class="note" style="margin:0 0 10px">${L(`Ще ${noPos} ${P(noPos,'смерть|смерті|смертей')} без координат: вони сталися поза бійками, а точне місце є лише зі шляху STRATZ. Встав ключ STRATZ вище, і вони з’являться.`,`${noPos} more ${P(noPos,'','death|deaths')} have no coordinates: they happened outside fights, and the exact spot comes only from the STRATZ path. Add a STRATZ key above to see them.`,`Ещё ${noPos} ${P(noPos,'','','смерть|смерти|смертей')} без координат: они случились вне драк, а точное место есть только из пути STRATZ. Вставь ключ STRATZ выше, и они появятся.`)}</div>`:''}
   <div class="mapwrap"><svg class="map" viewBox="0 0 128 128" role="img" aria-label="${L('Карта','Map','Карта')}"><image href="${MAPIMG}" x="0" y="0" width="128" height="128" preserveAspectRatio="none" class="m-img"/>${g}</svg>
   ${path&&path.length?`<div class="scrub"><input type="range" id="mapTime" min="${Math.max(0,path[0][0])}" max="${pmax}" step="1" value="${pmax}" aria-label="${L('Час','Time','Время')}"><span class="mono" id="mapTimeL">${mmss(pmax)}</span></div>`:''}
   <div class="maptip" id="mapTip">${L('Наведи або натисни на точку чи лінію, щоб побачити час.','Hover or tap a dot or line to see the time.','Наведи или нажми на точку или линию, чтобы увидеть время.')}</div>
