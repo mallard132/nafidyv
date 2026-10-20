@@ -56,6 +56,11 @@ h1 .q{color:var(--tape)}
 .chip:hover{border-color:#3a4252}
 .status{margin-top:16px;min-height:22px;font-size:14px;color:var(--muted)}
 .status.err{color:var(--dire)}
+.status small{display:block;color:var(--muted);font-size:12px;margin-top:6px;max-width:70ch}
+.status a{color:var(--tape)}
+.status .fb-links{margin-top:8px}
+.status .stz-row input{flex:1 1 220px;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 12px;font:500 14px var(--f-mono)}
+.status .stz-row button{background:var(--tape);color:var(--tape-ink);border:0;border-radius:8px;padding:9px 14px;font:700 13px var(--f-body);min-height:38px}
 .status.load::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--tape);margin-right:9px;animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.25}}
 
@@ -591,7 +596,7 @@ async function getJson(url,opt,generic){
   let r;
   try{r=await fetch(url,opt||undefined)}catch(e){throw new Error(L('Не вдалося зв’язатися з OpenDota. Перевір інтернет і спробуй ще раз.','Couldn’t reach OpenDota. Check your connection and try again.','Не удалось связаться с OpenDota. Проверь интернет и попробуй ещё раз.'))}
   if(r.status===404&&generic)throw new Error(L('OpenDota не має цих даних.','OpenDota has no data for this.','У OpenDota нет этих данных.'));
-  if(r.status===404)throw new Error(L('Такого матчу OpenDota не знає. Перевір ID: це число на 10 цифр із Dotabuff, OpenDota або з історії матчів у грі.','OpenDota doesn’t know this match. Check the ID: it’s a 10-digit number from Dotabuff, OpenDota or the in-game match history.','Такого матча OpenDota не знает. Проверь ID: это число из 10 цифр с Dotabuff, OpenDota или из истории матчей в игре.'));
+  if(r.status===404)throw nf404(L('Такого матчу OpenDota не знає. Перевір ID: це число на 10 цифр із Dotabuff, OpenDota або з історії матчів у грі.','OpenDota doesn’t know this match. Check the ID: it’s a 10-digit number from Dotabuff, OpenDota or the in-game match history.','Такого матча OpenDota не знает. Проверь ID: это число из 10 цифр с Dotabuff, OpenDota или из истории матчей в игре.'));
   if(r.status===429)throw new Error(L('OpenDota тимчасово обмежив кількість запитів. Зачекай хвилину й натисни ще раз.','OpenDota is limiting requests right now. Wait a minute and try again.','OpenDota временно ограничил число запросов. Подожди минуту и нажми ещё раз.'));
   if(!r.ok)throw new Error(L(`OpenDota відповів помилкою ${r.status}. Спробуй трохи пізніше.`,`OpenDota returned error ${r.status}. Try again a bit later.`,`OpenDota ответил ошибкой ${r.status}. Попробуй чуть позже.`));
   return r.json();
@@ -978,8 +983,8 @@ function render(){
   $('result').hidden=false;document.body.classList.add('has-result');
   const {m}=S;
   $('tapeTxt').textContent=(L(`МІСЦЕ ФІДУ · МАТЧ ${m.match_id} · НЕ ПЕРЕТИНАТИ · `,`FEED SCENE · MATCH ${m.match_id} · DO NOT CROSS · `,`МЕСТО ФИДА · МАТЧ ${m.match_id} · НЕ ПЕРЕСЕКАТЬ · `)).repeat(12);
-  $('notice').innerHTML=S.parsed?'':`<div class="notice"><p>${L('<b>Матч не розпарсений.</b> Поки що є лише фарм, бійки й будівлі в порівнянні з іншими гравцями на герої. Після парсингу додадуться лінія, деталі смертей (хто вбив, скільки золота віддано), вижен, рішення, епізоди та графік. Поки що позиції визначені приблизно, за статками.','<b>Match not parsed.</b> For now there’s only farm, fights and buildings compared with other players on the same hero. After parsing you also get lane, death details (who killed, how much gold was fed), vision, decisions, episodes and the graph. Positions are estimated from net worth for now.','<b>Матч не распарсен.</b> Пока есть только фарм, драки и строения в сравнении с другими игроками на герое. После парсинга добавятся линия, детали смертей (кто убил, сколько золота отдано), вижн, решения, эпизоды и график. Пока позиции определены примерно, по богатству.')}</p><button id="parseBtn" type="button">${L('Розпарсити на OpenDota','Parse on OpenDota','Распарсить на OpenDota')}</button></div>`;
-  if(!S.parsed)$('parseBtn').onclick=requestParse;
+  $('notice').innerHTML=S.m._src==='stratz'?stratzNotice():S.parsed?'':`<div class="notice"><p>${L('<b>Матч не розпарсений.</b> Поки що є лише фарм, бійки й будівлі в порівнянні з іншими гравцями на герої. Після парсингу додадуться лінія, деталі смертей (хто вбив, скільки золота віддано), вижен, рішення, епізоди та графік. Поки що позиції визначені приблизно, за статками.','<b>Match not parsed.</b> For now there’s only farm, fights and buildings compared with other players on the same hero. After parsing you also get lane, death details (who killed, how much gold was fed), vision, decisions, episodes and the graph. Positions are estimated from net worth for now.','<b>Матч не распарсен.</b> Пока есть только фарм, драки и строения в сравнении с другими игроками на герое. После парсинга добавятся линия, детали смертей (кто убил, сколько золота отдано), вижн, решения, эпизоды и график. Пока позиции определены примерно, по богатству.')}</p><button id="parseBtn" type="button">${L('Розпарсити на OpenDota','Parse on OpenDota','Распарсить на OpenDota')}</button></div>`;
+  if(!S.parsed&&$('parseBtn'))$('parseBtn').onclick=requestParse;
   renderDossier();renderEpisodes();renderMatch();renderDraft();renderGraph();renderChat();renderTeams();renderBar();
 }
 
@@ -1544,12 +1549,74 @@ async function requestParse(){
 }
 
 /* ---------- запуск ---------- */
+/* ---------- резерв: OpenDota ще не має матчу ---------- */
+let waitTimer=null;
+const SGM={ALL_PICK:1,CAPTAINS_MODE:2,RANDOM_DRAFT:3,SINGLE_DRAFT:4,ALL_RANDOM:5,ABILITY_DRAFT:18,ALL_PICK_RANKED:22,TURBO:23};
+const SLT={UNRANKED:0,PRACTICE:1,TOURNAMENT:2,RANKED:7};
+const nf404=msg=>Object.assign(new Error(msg),{status:404});
+function setStatusHtml(h,cls){const el=$('status');el.innerHTML=h;el.className='status'+(cls?' '+cls:'')}
+const stratzNotice=()=>`<div class="notice"><p>${L('<b>Дані зі STRATZ.</b> OpenDota ще не має цього матчу, тому поки що показую базову статистику зі STRATZ. Я попросив OpenDota завантажити матч — щойно він з’явиться, сторінка сама оновиться до повного розбору.','<b>Data from STRATZ.</b> OpenDota doesn’t have this match yet, so for now this is basic STRATZ data. I asked OpenDota to fetch the match — as soon as it appears, the page will update to the full breakdown by itself.','<b>Данные из STRATZ.</b> OpenDota ещё не знает этот матч, поэтому пока показываю базовую статистику из STRATZ. Я попросил OpenDota загрузить матч — как только он появится, страница сама обновится до полного разбора.')}</p></div>`;
+
+async function fromStratz(id){
+  const q='query($id:Long!){match(id:$id){id didRadiantWin durationSeconds startDateTime gameMode lobbyType players{playerSlot isRadiant heroId kills deaths assists numLastHits numDenies goldPerMinute experiencePerMinute level networth heroDamage towerDamage heroHealing leaverStatus position item0Id item1Id item2Id item3Id item4Id item5Id neutral0Id steamAccountId steamAccount{name seasonRank}}}}';
+  let r;
+  try{r=await fetch('https://api.stratz.com/graphql',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+stzKey()},body:JSON.stringify({query:q,variables:{id:+id}})})}
+  catch(e){throw new Error(L('Не вдалося зв’язатися з STRATZ.','Couldn’t reach STRATZ.','Не удалось связаться с STRATZ.'))}
+  if(r.status===401||r.status===403)throw new Error(L('STRATZ не прийняв ключ. Перевір, що скопіював його повністю.','STRATZ rejected the key. Make sure you copied all of it.','STRATZ не принял ключ. Проверь, что скопировал его полностью.'));
+  if(r.status===429)throw new Error(L('Ліміт запитів STRATZ вичерпано. Спробуй пізніше.','STRATZ rate limit reached. Try later.','Лимит запросов STRATZ исчерпан. Попробуй позже.'));
+  const j=await r.json(),mm=j.data&&j.data.match;
+  if(!mm){if(j.errors&&j.errors.length)throw new Error('STRATZ: '+j.errors.map(e=>e.message).join('; ').slice(0,240));throw new Error(L('STRATZ теж не знає цього матчу.','STRATZ doesn’t know this match either.','STRATZ тоже не знает этот матч.'))}
+  if(!Array.isArray(mm.players)||mm.players.length<2||!mm.durationSeconds||mm.didRadiantWin==null)throw new Error(L('STRATZ ще не має результату цього матчу.','STRATZ doesn’t have this match result yet.','У STRATZ ещё нет результата этого матча.'));
+  const pos=v=>{const d=String(v||'').match(/(\d)/);return d?+d[1]:undefined};
+  const players=mm.players.map(p=>({player_slot:p.playerSlot,isRadiant:!!p.isRadiant,hero_id:p.heroId,kills:p.kills||0,deaths:p.deaths||0,assists:p.assists||0,last_hits:p.numLastHits||0,denies:p.numDenies||0,gold_per_min:p.goldPerMinute||0,xp_per_min:p.experiencePerMinute||0,level:p.level,net_worth:p.networth||0,hero_damage:p.heroDamage||0,tower_damage:p.towerDamage||0,hero_healing:p.heroHealing||0,
+    leaver_status:!p.leaverStatus||p.leaverStatus==='NONE'?0:p.leaverStatus==='DISCONNECTED'?1:3,position_est:pos(p.position),
+    item_0:p.item0Id||0,item_1:p.item1Id||0,item_2:p.item2Id||0,item_3:p.item3Id||0,item_4:p.item4Id||0,item_5:p.item5Id||0,item_neutral:p.neutral0Id||0,
+    account_id:p.steamAccountId||null,personaname:p.steamAccount&&p.steamAccount.name||null,rank_tier:p.steamAccount&&p.steamAccount.seasonRank||null}));
+  const sc=r=>players.filter(p=>p.isRadiant===r).reduce((a,p)=>a+p.kills,0);
+  return{match_id:+id,duration:mm.durationSeconds,radiant_win:!!mm.didRadiantWin,start_time:mm.startDateTime,game_mode:SGM[mm.gameMode],lobby_type:SLT[mm.lobbyType],radiant_score:sc(true),dire_score:sc(false),players,_src:'stratz'};
+}
+
+/* просимо OpenDota завантажити матч із серверів Valve і чекаємо, поки він з'явиться */
+async function waitOpenDota(id){
+  clearInterval(waitTimer);
+  try{await getJson(API+'/request/'+id,{method:'POST'},true)}catch(e){}
+  let n=0;
+  waitTimer=setInterval(async()=>{
+    n++;
+    try{const m=await getJson(API+'/matches/'+id,null,true);
+      if(m&&Array.isArray(m.players)&&m.players.length>1&&m.duration&&m.radiant_win!=null){
+        clearInterval(waitTimer);
+        if((S&&String(S.m.match_id)===String(id))||parseId($('mid').value)===String(id)){await loadConst();show(m);setStatus(L('Матч з’явився на OpenDota — показую повний розбір.','The match is now on OpenDota — showing the full breakdown.','Матч появился на OpenDota — показываю полный разбор.'));try{history.replaceState(null,'','#'+id)}catch(e){}}
+        return}}catch(e){}
+    if(n>=24){clearInterval(waitTimer);if(!S||String(S.m.match_id)!==String(id))setStatus(L('OpenDota так і не отримав цей матч за 6 хвилин. Перевір ID або спробуй пізніше.','OpenDota still hasn’t got this match after 6 minutes. Check the ID or try later.','OpenDota так и не получил этот матч за 6 минут. Проверь ID или попробуй позже.'),'err')}
+  },15000);
+}
+function waitingHtml(id,stzMsg){
+  const key=stzKey();
+  return `${esc(L(`OpenDota ще не знає матч ${id}. Я попросив його завантажити з серверів Valve — зазвичай це 1–3 хвилини, сторінка оновиться сама.`,`OpenDota doesn’t know match ${id} yet. I asked it to fetch the match from Valve’s servers — usually 1–3 minutes; the page will update by itself.`,`OpenDota ещё не знает матч ${id}. Я попросил загрузить его с серверов Valve — обычно 1–3 минуты, страница обновится сама.`))}
+  ${stzMsg?`<br><span class="c3">${esc(stzMsg)}</span>`:''}
+  ${key?'':`<div class="stz-row" style="margin-top:10px"><input type="password" id="fbKey" autocomplete="off" placeholder="${L('Ключ STRATZ','STRATZ key','Ключ STRATZ')}" aria-label="${L('Ключ STRATZ','STRATZ key','Ключ STRATZ')}"><button type="button" id="fbSave">${L('Показати зі STRATZ','Show from STRATZ','Показать из STRATZ')}</button></div><small>${L('Не хочеш чекати? Встав безкоштовний ключ STRATZ (stratz.com/api → вхід через Steam → скопіюй токен), і матч відкриється одразу. Ключ зберігається лише в цьому браузері.','Don’t want to wait? Paste a free STRATZ key (stratz.com/api → sign in with Steam → copy the token) and the match opens right away. The key stays in this browser.','Не хочешь ждать? Вставь бесплатный ключ STRATZ (stratz.com/api → вход через Steam → скопируй токен), и матч откроется сразу. Ключ хранится только в этом браузере.')}</small>`}
+  <div class="fb-links">${L('Подивитися зараз:','View now:','Посмотреть сейчас:')} <a href="https://www.dotabuff.com/matches/${id}" target="_blank" rel="noopener">Dotabuff</a> · <a href="https://stratz.com/matches/${id}" target="_blank" rel="noopener">STRATZ</a></div>`;
+}
+async function fallback(id){
+  waitOpenDota(id);
+  let msg='';
+  if(stzKey()){
+    setStatus(L(`OpenDota ще не має матчу ${id} — беру дані зі STRATZ…`,`OpenDota doesn’t have match ${id} yet — getting it from STRATZ…`,`У OpenDota ещё нет матча ${id} — беру данные из STRATZ…`),'load');
+    try{const m=await fromStratz(id);await loadConst();show(m);setStatus('');try{history.replaceState(null,'','#'+id)}catch(e){}
+      $('result').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return}
+    catch(e){msg=e.message}
+  }
+  setStatusHtml(waitingHtml(id,msg),'load');
+  const sv=$('fbSave');if(sv)sv.onclick=()=>{const v=($('fbKey').value||'').trim();if(!v)return;try{localStorage.setItem('nf_stratz',v)}catch(e){};fallback(id)};
+}
+
 function show(m){S=analyze(m);S.sel=S.culprit.i;render();saveHistory()}
 
 async function run(raw){
   const id=parseId(raw);
   if(!id){setStatus(L(`Не бачу ID матчу. Встав число на зразок ${EXAMPLE} або посилання на матч.`,`I can’t see a match ID. Paste a number like ${EXAMPLE} or a match link.`,`Не вижу ID матча. Вставь число вроде ${EXAMPLE} или ссылку на матч.`),'err');return}
-  clearInterval(pollTimer);
+  clearInterval(pollTimer);clearInterval(waitTimer);
   $('mid').value=id;$('go').disabled=true;$('mid').blur();
   setStatus(L(`Дістаю матч ${id} з OpenDota…`,`Fetching match ${id} from OpenDota…`,`Достаю матч ${id} из OpenDota…`),'load');
   try{
@@ -1559,7 +1626,7 @@ async function run(raw){
     show(m);setStatus('');
     try{history.replaceState(null,'','#'+id)}catch(e){}
     $('result').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
-  }catch(e){console.error(e);setStatus(e.message,'err')}
+  }catch(e){if(e.status===404){fallback(id);return}console.error(e);setStatus(e.message,'err')}
   finally{$('go').disabled=false}
 }
 
