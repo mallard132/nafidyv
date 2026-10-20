@@ -102,9 +102,10 @@ h1 .q{color:var(--tape)}
 .sub-h{font:700 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
 .facts{list-style:none;padding:0;margin:0;display:grid;gap:8px}
 .facts li{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start}
-.facts li::before{content:"•";font:700 12px/20px var(--f-mono);color:var(--muted);text-align:center;background:var(--ink);border-radius:5px}
-.facts li.bad::before{content:"✕";color:var(--t3);background:rgba(240,71,74,.13)}
-.facts li.good::before{content:"✓";color:var(--t0);background:rgba(91,201,141,.13)}
+.facts li::before{content:"";display:block;width:7px;height:7px;border-radius:50%;background:var(--muted);opacity:.55;margin:7px auto 0}
+.facts li.bad::before{width:0;height:0;border-radius:0;background:none;opacity:1;border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid var(--t3);margin-top:6px}
+.facts li.good::before{width:0;height:0;border-radius:0;background:none;opacity:1;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid var(--t0);margin-top:5px}
+.src{display:inline-block;font:700 9px var(--f-mono);letter-spacing:.08em;padding:1px 5px;border-radius:4px;background:var(--ink);color:var(--muted);margin-left:6px;vertical-align:1px}
 .facts.sm{font-size:13.5px;line-height:1.45;gap:7px}
 .back{margin-top:18px;background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);min-height:38px}
 .back:hover{color:var(--text);border-color:#3a4252}
@@ -335,10 +336,10 @@ footer a{color:inherit}
 .m-obs{fill:#f5c443;stroke:#000;stroke-width:.4}
 .m-sen{fill:#5aa9ff;stroke:#000;stroke-width:.4}
 .m-dead{stroke:var(--t3);stroke-width:.9}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .tiles div{background:var(--panel2);padding:10px 12px;min-width:0}
 .tiles small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.tiles b{font:700 16px var(--f-mono)}
+.tiles b{display:block;font:700 16px var(--f-mono);overflow-wrap:anywhere;margin-top:2px}
 .chat{display:grid;gap:3px;max-height:440px;overflow-y:auto;padding-right:4px}
 .msg{display:grid;grid-template-columns:44px 34px minmax(0,1fr);gap:8px;align-items:center;font-size:13.5px;padding:5px 6px;border-radius:6px}
 .msg.tox{background:rgba(240,71,74,.09)}
@@ -1326,7 +1327,30 @@ async function loadPeers(id){
     PEERS[id]={a:list};
   }catch(e){PEERS[id]={err:e.message}}
 }
-const GAMES_FOR={3:300,4:450,5:700,6:1000,7:1500,8:2200};
+/* пороги STRATZ «Rapid High Rank» (рейтингові ігри): Legend 100, Ancient 250, Divine 500, Immortal 1000 */
+const STRATZ_FAST={5:100,6:250,7:500,8:1000};
+/* механічно складні герої (Valve: «hero complexity mismatch») */
+const HARD_HEROES=[74,82,66,91,107,92,113,34,10,80,61,17,106,111,46,13];
+const quant=(a,q)=>{const pos=(a.length-1)*q,b=Math.floor(pos),r=pos-b;return a[b+1]!==undefined?a[b]+r*(a[b+1]-a[b]):a[b]};
+/* IEEE ToG 2023: викид, якщо показник вище Q3 + 1,5·IQR решти гравців лобі */
+function lobbyOutliers(p){
+  const min=Math.max(1,S.dur/60),out=[];
+  const met=[['KDA',q=>((q.kills||0)+(q.assists||0))/Math.max(1,q.deaths||0)],['XPM',q=>q.xp_per_min||0],[L('шкода/хв','damage/min','урон/мин'),q=>(q.hero_damage||0)/min],['GPM',q=>q.gold_per_min||0]];
+  for(const [n,f] of met){const o=S.P.filter(q=>q!==p).map(f).sort((x,y)=>x-y);if(o.length<6)continue;const q1=quant(o,.25),q3=quant(o,.75),v=f(p);if(v>0&&v>q3+1.5*(q3-q1))out.push(n)}
+  return out;
+}
+/* STRATZ «Boosted Account»: ≥60 рейтингових ігор за 14 днів з вінрейтом ≥75% і ≥10 іграми щотижня, за останній рік */
+function hotStreak(R,now){
+  const a=R.filter(m=>m.start_time>=now-365*86400).slice().reverse();if(a.length<60)return null;
+  const W=14*86400,win=m=>(m.player_slot<128)===m.radiant_win;let j=0,wins=0,best=null;
+  for(let i=0;i<a.length;i++){
+    while(j<a.length&&a[j].start_time<a[i].start_time+W){if(win(a[j]))wins++;j++}
+    const n=j-i;
+    if(n>=60){const w=wins/n;if(w>=.75){const mid=a[i].start_time+W/2,wk1=a.slice(i,j).filter(m=>m.start_time<mid).length;if(wk1>=10&&n-wk1>=10&&(!best||w>best.w))best={n,w,a:a[i].start_time,b:a[j-1].start_time}}}
+    if(win(a[i]))wins--;
+  }
+  return best;
+}
 const DAYS=n=>P(n,'день|дні|днів','day|days','день|дня|дней');
 const fdate=t=>new Date(t*1000).toLocaleDateString(LOC[LANG],{day:'2-digit',month:'2-digit',year:'numeric'});
 const median=a=>{if(!a.length)return null;const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
@@ -1349,24 +1373,40 @@ function smurfEval(p){
   const base={n,nR,rYear,first,ageD,wr20,wr100,wrAll,kda20,hg,lob,lobNow,lobStart};
   if(n<15)return{...base,kind:'few'};
   if(nR===0||rYear===0)return{...base,kind:'turbo'};
-  const SS=[],SO=[],SB=[],add=(arr,w,t)=>arr.push({w,t});
-  /* ---- смурф ---- */
-  const need=GAMES_FOR[medal];
-  if(need&&rk){const r=nR/need,t=L(`Лише ${nR} рейтингових ігор при ранзі ${rk.n} — зазвичай до нього грають ${need}+.`,`Only ${nR} ranked games at ${rk.n} — players usually need ${need}+ to get there.`,`Всего ${nR} рейтинговых игр при ранге ${rk.n} — обычно до него играют ${need}+.`);
-    if(r<.15)add(SS,35,t);else if(r<.3)add(SS,22,t);else if(r<.5)add(SS,10,t)}
-  if(medal>=5){const t=L(`Перша публічна гра ${ageD} ${DAYS(ageD)} тому (${fdate(first)}).`,`First public game ${ageD} ${DAYS(ageD)} ago (${fdate(first)}).`,`Первая публичная игра ${ageD} ${DAYS(ageD)} назад (${fdate(first)}).`);
-    if(ageD<30)add(SS,20,t);else if(ageD<90)add(SS,12,t);else if(ageD<180)add(SS,5,t)}
+  const SS=[],SO=[],SB=[],add=(arr,w,t,src)=>arr.push({w,t,src:src||''});
+  /* ---- смурф: критерії STRATZ, Valve і статті IEEE ToG 2023 (викид за IQR) ---- */
+  /* STRATZ «Rapid High Rank»: Legend < 100, Ancient < 250, Divine < 500, Immortal < 1000 рейтингових ігор */
+  const fast=STRATZ_FAST[medal];
+  if(fast&&rk){
+    if(nR<fast)add(SS,35,L(`${rk.n} лише за ${nR} рейтингових ігор — швидше за поріг STRATZ (${fast}).`,`${rk.n} in only ${nR} ranked games — faster than the STRATZ threshold (${fast}).`,`${rk.n} всего за ${nR} рейтинговых игр — быстрее порога STRATZ (${fast}).`),'STRATZ');
+    else if(nR<fast*2)add(SS,12,L(`${rk.n} за ${nR} рейтингових ігор — удвічі ближче до порогу STRATZ (${fast}), ніж зазвичай.`,`${rk.n} in ${nR} ranked games — within twice the STRATZ threshold (${fast}).`,`${rk.n} за ${nR} рейтинговых игр — в пределах двойного порога STRATZ (${fast}).`),'STRATZ');
+  }
+  /* STRATZ «New Account»: перша гра менш ніж рік тому */
+  if(ageD<365)add(SS,ageD<90?25:15,L(`Новий акаунт: перша публічна гра ${ageD} ${DAYS(ageD)} тому (${fdate(first)}).`,`New account: first public game ${ageD} ${DAYS(ageD)} ago (${fdate(first)}).`,`Новый аккаунт: первая публичная игра ${ageD} ${DAYS(ageD)} назад (${fdate(first)}).`),'STRATZ');
+  /* Valve: вінрейт 75%+ у перших 50 рейтингових іграх */
+  const Rasc=R.slice().reverse(),f50=Rasc.slice(0,50);
+  if(f50.length>=40){const w=wr(f50);if(w>=.65)add(SS,w>=.75?20:10,L(`Вінрейт ${pct(w)} у перших ${f50.length} рейтингових іграх акаунта.`,`${pct(w)} win rate in the account’s first ${f50.length} ranked games.`,`Винрейт ${pct(w)} в первых ${f50.length} рейтинговых играх аккаунта.`),'Valve')}
+  /* Valve: аномальний вінрейт у недавньому вікні */
+  if(r20.length>=15&&wr20>=.7)add(SS,wr20>=.8?15:8,L(`Вінрейт ${pct(wr20)} в останніх ${r20.length} рейтингових іграх.`,`${pct(wr20)} win rate over the last ${r20.length} ranked games.`,`Винрейт ${pct(wr20)} в последних ${r20.length} рейтинговых играх.`),'Valve');
+  if(r100.length>=60&&wr100>=.58)add(SS,wr100>=.62?12:6,L(`Вінрейт ${pct(wr100)} на дистанції ${r100.length} рейтингових ігор (норма — близько 50%).`,`${pct(wr100)} win rate over ${r100.length} ranked games (normal is about 50%).`,`Винрейт ${pct(wr100)} на дистанции ${r100.length} рейтинговых игр (норма — около 50%).`),'Valve');
+  /* Valve: висока результативність на складних героях при низькому ранзі */
+  if(medal&&medal<=4){const r50=R.slice(0,50),hard=r50.filter(m=>HARD_HEROES.includes(m.hero_id));
+    if(r50.length>=20&&hard.length>=8&&wr(hard)>=.6)add(SS,12,L(`${hard.length} з ${r50.length} останніх ігор на складних героях (Invoker, Meepo, Chen…) з вінрейтом ${pct(wr(hard))} — нетипово для ${rk?rk.n:'низького рангу'}.`,`${hard.length} of the last ${r50.length} games on hard heroes (Invoker, Meepo, Chen…) with ${pct(wr(hard))} win rate — unusual for ${rk?rk.n:'a low rank'}.`,`${hard.length} из ${r50.length} последних игр на сложных героях (Invoker, Meepo, Chen…) с винрейтом ${pct(wr(hard))} — нетипично для ${rk?rk.n:'низкого ранга'}.`),'Valve')}
+  /* IEEE ToG 2023: статистичний викид серед гравців лобі (вище Q3 + 1,5·IQR) */
+  const out=lobbyOutliers(p);
+  if(out.length>=2)add(SS,out.length>=3?20:12,L(`Викид у лобі цього матчу за ${out.length} показниками (${out.join(', ')}): вище Q3 + 1,5·IQR інших гравців.`,`Lobby outlier in this match on ${out.length} stats (${out.join(', ')}): above Q3 + 1.5·IQR of the other players.`,`Выброс в лобби этого матча по ${out.length} показателям (${out.join(', ')}): выше Q3 + 1,5·IQR других игроков.`),'IEEE');
+  /* Valve: продуктивність далеко вище свого брекету — порівняння з гравцями на герої (перцентилі OpenDota) */
+  const perf=avg([bp(p,'gold_per_min'),bp(p,'xp_per_min'),bp(p,'last_hits_per_min'),bp(p,'hero_damage_per_min')]);
+  if(perf!=null&&perf>=.85)add(SS,perf>=.93?10:5,L(`Фарм, досвід і шкода кращі, ніж у ${pct(perf)} гравців на ${H(p)}.`,`Farm, XP and damage beat ${pct(perf)} of ${H(p)} players.`,`Фарм, опыт и урон лучше, чем у ${pct(perf)} игроков на ${H(p)}.`),'Valve');
+  if(perf!=null&&perf>=.85&&hg<=5)add(SS,8,L(`Лише ${hg} ${P(hg,'гра|гри|ігор')} на ${H(p)}, а грає як досвідчений.`,`Only ${hg} ${P(hg,'','game|games')} on ${H(p)}, yet plays like a veteran.`,`Всего ${hg} ${P(hg,'','','игра|игры|игр')} на ${H(p)}, а играет как опытный.`),'Valve');
+  /* рівень лобі вищий за медаль і швидкість росту (за average_rank OpenDota) */
   if(p.rank_tier&&lobNow!=null&&lob.length>=10){const gap=lobNow-p.rank_tier;
-    if(gap>=8)add(SS,gap>=15?20:10,L(`Останні ігри в лобі рівня ${rkName(lobNow)}, а медаль лише ${rk.n}: справжній рейтинг вищий за медаль.`,`Recent games are in ${rkName(lobNow)} lobbies while the medal is only ${rk.n}: the real rating is above the medal.`,`Последние игры в лобби уровня ${rkName(lobNow)}, а медаль всего ${rk.n}: настоящий рейтинг выше медали.`))}
+    if(gap>=8)add(SS,gap>=15?15:8,L(`Останні ігри в лобі рівня ${rkName(lobNow)}, а медаль лише ${rk.n}: справжній рейтинг вищий за медаль.`,`Recent games are in ${rkName(lobNow)} lobbies while the medal is only ${rk.n}: the real rating is above the medal.`,`Последние игры в лобби уровня ${rkName(lobNow)}, а медаль всего ${rk.n}: настоящий рейтинг выше медали.`),'OpenDota')}
   if(lob.length>=40&&lobNow!=null&&lobStart!=null){const per100=(lobNow-lobStart)/(nR/100);
-    if(per100>=6&&nR<=500)add(SS,per100>=10?20:10,L(`Швидкий ріст: з ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтингових ігор.`,`Fast climb: from ${rkName(lobStart)} to ${rkName(lobNow)} in ${nR} ranked games.`,`Быстрый рост: с ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтинговых игр.`))}
-  if(r100.length>=60&&wr100>=.56)add(SS,wr100>=.6?15:6,L(`Вінрейт ${pct(wr100)} на дистанції ${r100.length} рейтингових ігор (норма — близько 50%).`,`${pct(wr100)} win rate over ${r100.length} ranked games (normal is about 50%).`,`Винрейт ${pct(wr100)} на дистанции ${r100.length} рейтинговых игр (норма — около 50%).`));
-  if(r20.length>=15&&wr20>=.65)add(SS,wr20>=.75?20:12,L(`Вінрейт ${pct(wr20)} в останніх ${r20.length} рейтингових іграх.`,`${pct(wr20)} win rate over the last ${r20.length} ranked games.`,`Винрейт ${pct(wr20)} в последних ${r20.length} рейтинговых играх.`));
-  if(kda20!=null&&kda20>=5)add(SS,8,L(`Середній KDA ${dec(kda20)} в останніх іграх.`,`Average KDA ${dec(kda20)} in recent games.`,`Средний KDA ${dec(kda20)} в последних играх.`));
-  const perf=avg([bp(p,'gold_per_min'),bp(p,'hero_damage_per_min'),bp(p,'xp_per_min'),bp(p,'last_hits_per_min')]);
-  if(perf!=null&&perf>=.8)add(SS,perf>=.9?10:5,L(`У цьому матчі фарм і шкода кращі, ніж у ${pct(perf)} гравців на ${H(p)}.`,`In this match farm and damage beat ${pct(perf)} of ${H(p)} players.`,`В этом матче фарм и урон лучше, чем у ${pct(perf)} игроков на ${H(p)}.`));
-  if(perf!=null&&perf>=.8&&hg<=5)add(SS,8,L(`Лише ${hg} ${P(hg,'гра|гри|ігор')} на ${H(p)}, а грає як досвідчений.`,`Only ${hg} ${P(hg,'','game|games')} on ${H(p)}, yet plays like a veteran.`,`Всего ${hg} ${P(hg,'','','игра|игры|игр')} на ${H(p)}, а играет как опытный.`));
-  if(p.A&&p.A.lane&&p.A.lane.s>=85)add(SS,6,L(`Дуже впевнена лінія в цьому матчі (${Math.round(p.A.lane.s)}/100), нетипово для рангу.`,`Very confident laning in this match (${Math.round(p.A.lane.s)}/100), unusual for the rank.`,`Очень уверенная линия в этом матче (${Math.round(p.A.lane.s)}/100), нетипично для ранга.`));
+    if(per100>=6&&nR<=500)add(SS,per100>=10?15:8,L(`Швидкий ріст: з ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтингових ігор.`,`Fast climb: from ${rkName(lobStart)} to ${rkName(lobNow)} in ${nR} ranked games.`,`Быстрый рост: с ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтинговых игр.`),'OpenDota')}
+  /* STRATZ «Boosted Account»: серія 75%+ на ≥60 іграх за 2 тижні, ≥10 ігор щотижня */
+  const hot=hotStreak(R,now);
+  if(hot)add(SB,35,L(`Серія ${hot.n} рейтингових ігор за 2 тижні (${fdate(hot.a)}–${fdate(hot.b)}) з вінрейтом ${pct(hot.w)} — критерій бусту STRATZ.`,`A streak of ${hot.n} ranked games in 2 weeks (${fdate(hot.a)}–${fdate(hot.b)}) at ${pct(hot.w)} win rate — the STRATZ boosting criterion.`,`Серия ${hot.n} рейтинговых игр за 2 недели (${fdate(hot.a)}–${fdate(hot.b)}) с винрейтом ${pct(hot.w)} — критерий буста STRATZ.`),'STRATZ');
   /* ---- куплений / чужий акаунт ---- */
   const asc=hist.slice().reverse();let gi=-1,gap=0;
   for(let i=1;i<asc.length;i++){const g=asc[i].start_time-asc[i-1].start_time;if(g>gap&&asc.length-i>=15&&i>=30&&asc[i].start_time>=now-730*86400){gap=g;gi=i}}
@@ -1442,7 +1482,7 @@ function smurfBadge(p){
 }
 function verdictBox(title,o){
   return `<div class="sv"><div class="sv-h"><span>${title}</span><b class="c${o.v.c}">${o.s}<small>/100</small></b></div><div class="meter c${o.v.c}"><i style="--w:${Math.max(2,o.s)}%"></i></div><div class="sv-t c${o.v.c}">${esc(o.v.t)}</div>
-  ${o.sig.length?`<ul class="facts sm">${o.sig.map(x=>`<li class="${x.w>=15?'bad':'info'}"><span>${esc(x.t)} <span class="mono" style="color:var(--muted)">+${x.w}</span></span></li>`).join('')}</ul>`:`<div class="empty">${L('Сигналів не знайдено.','No signals found.','Сигналов не найдено.')}</div>`}</div>`;
+  ${o.sig.length?`<ul class="facts sm">${o.sig.map(x=>`<li class="${x.w>=15?'bad':'info'}"><span>${esc(x.t)} <span class="mono" style="color:var(--muted)">+${x.w}</span>${x.src?`<span class="src">${x.src}</span>`:''}</span></li>`).join('')}</ul>`:`<div class="empty">${L('Сигналів не знайдено.','No signals found.','Сигналов не найдено.')}</div>`}</div>`;
 }
 /* графік рівня лобі: як змінювався реальний рівень ігор гравця */
 function lobbyChart(e,p){
@@ -1477,7 +1517,7 @@ function profileHtml(p){
   if(e.kind==='hidden'||e.kind==='few')return h+smurfNote();
   if(e.kind!=='turbo')h+=`<div class="svs">${verdictBox(L('Смурф','Smurf','Смурф'),e.smurf)}${verdictBox(L('Куплений / чужий акаунт','Bought / someone else’s account','Купленный / чужой аккаунт'),e.acct)}${verdictBox(L('Буст','Boosting','Буст'),e.boost)}</div>`;
   if(pe&&pe.loading)h+=loadingHtml(L('Перевіряю напарників…','Checking frequent teammates…','Проверяю напарников…'));
-  const tiles=[[L('Рейтингових ігор','Ranked games','Рейтинговых игр'),num(e.nR)],[L('Усього публічних','All public','Всего публичных'),num(e.n)],[L('Перша гра','First game','Первая игра'),fdate(e.first)],[L('Вік акаунта','Account age','Возраст аккаунта'),e.ageD>=365?`${dec(e.ageD/365)} ${L('р.','yr','г.')}`:`${e.ageD} ${DAYS(e.ageD)}`],[L('Вінрейт: 20 / 100 рейт.','Win rate: 20 / 100 ranked','Винрейт: 20 / 100 рейт.'),[e.wr20,e.wr100].map(x=>x!=null?pct(x):'—').join(' / ')],[L('KDA (20 ігор)','KDA (20 games)','KDA (20 игр)'),e.kda20!=null?dec(e.kda20):'—'],[L('Рівень лобі: тоді → зараз','Lobby level: then → now','Уровень лобби: тогда → сейчас'),e.lobStart!=null&&e.lobNow!=null?`${rkName(e.lobStart)} → ${rkName(e.lobNow)}`:'—'],[L(`Ігор на ${H(p)}`,`Games on ${H(p)}`,`Игр на ${H(p)}`),e.hg]];
+  const tiles=[[L('Рейтингових ігор','Ranked games','Рейтинговых игр'),num(e.nR)],[L('Усього публічних','All public','Всего публичных'),num(e.n)],[L('Перша гра','First game','Первая игра'),fdate(e.first)],[L('Вік акаунта','Account age','Возраст аккаунта'),e.ageD>=365?`${dec(e.ageD/365)} ${L('р.','yr','г.')}`:`${e.ageD} ${DAYS(e.ageD)}`],[L('Вінрейт: 20 / 100 рейт.','Win rate: 20 / 100 ranked','Винрейт: 20 / 100 рейт.'),[e.wr20,e.wr100].map(x=>x!=null?pct(x):'—').join(' / ')],[L('KDA (20 ігор)','KDA (20 games)','KDA (20 игр)'),e.kda20!=null?dec(e.kda20):'—'],[L('Рівень лобі','Lobby level','Уровень лобби'),e.lobStart!=null&&e.lobNow!=null?`${rkName(e.lobStart)} → ${rkName(e.lobNow)}`:'—'],[L(`Ігор на ${H(p)}`,`Games on ${H(p)}`,`Игр на ${H(p)}`),e.hg]];
   h+=`<div class="tiles" style="margin-top:16px">${tiles.map(([l,x])=>`<div><small>${esc(l)}</small><b>${esc(x)}</b></div>`).join('')}</div>`;
   h+=lobbyChart(e,p);
   if(e.split){const top=a=>{const c={};a.forEach(m=>c[m.hero_id]=(c[m.hero_id]||0)+1);return Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,6)};
@@ -1487,7 +1527,7 @@ function profileHtml(p){
     if(top.length)h+=`<div class="sec-h"><h3>${L('З ким грає найчастіше','Plays most often with','С кем играет чаще всего')}</h3><small>${L('ігор разом · вінрейт разом','games together · win rate together','игр вместе · винрейт вместе')}</small></div><div class="hbars">${top.map(x=>{const r=PRANK[x.account_id];return `<div class="hbar c1"><span class="who"><a href="https://www.opendota.com/players/${x.account_id}" target="_blank" rel="noopener" style="color:inherit">${esc(x.personaname||('#'+x.account_id))}</a>${r?` <small style="color:var(--muted)">${rank(r).n}</small>`:''}</span><span class="bar"><i style="--w:${Math.round(x.with_games/top[0].with_games*100)}%"></i></span><span class="v">${x.with_games} · ${pct(x.with_win/x.with_games)}</span></div>`}).join('')}</div>`}
   return h+smurfNote();
 }
-const smurfNote=()=>`<div class="note">${L('Це ймовірність за відкритими даними, а не доказ: на 100% смурфа чи чужий акаунт не визначить ніхто. Бали — сума сигналів (вказані біля кожного). Рахуються лише публічні матчі. Найчастіша помилка — гравець, який повернувся після довгої перерви, тому для таких є окрема категорія.','This is a probability based on public data, not proof: nobody can detect a smurf or a different owner with 100% certainty. Scores are the sum of signals (shown next to each). Only public matches count. The most common false alarm is a player returning after a long break, so they get their own category.','Это вероятность по открытым данным, а не доказательство: на 100% смурфа или чужой аккаунт не определит никто. Баллы — сумма сигналов (указаны возле каждого). Считаются только публичные матчи. Самая частая ошибка — игрок, вернувшийся после долгого перерыва, поэтому для таких есть отдельная категория.')}</div>`;
+const smurfNote=()=>`<div class="note">${L('Критерії: STRATZ (новий акаунт, швидкий високий ранг, буст-серія), Valve (аномальний вінрейт, складні герої, продуктивність вище брекету), стаття «Profiling and Identifying Smurfs or Boosters on Dota 2», IEEE Transactions on Games, 2023 (викид за IQR). ','Criteria: STRATZ (new account, rapid high rank, boost streak), Valve (abnormal win rate, hard heroes, above-bracket performance), and the paper “Profiling and Identifying Smurfs or Boosters on Dota 2”, IEEE Transactions on Games, 2023 (IQR outlier). ','Критерии: STRATZ (новый аккаунт, быстрый высокий ранг, буст-серия), Valve (аномальный винрейт, сложные герои, продуктивность выше брекета), статья «Profiling and Identifying Smurfs or Boosters on Dota 2», IEEE Transactions on Games, 2023 (выброс по IQR). ')}${L('Це ймовірність за відкритими даними, а не доказ: на 100% смурфа чи чужий акаунт не визначить ніхто. Бали — сума сигналів (вказані біля кожного). Рахуються лише публічні матчі. Найчастіша помилка — гравець, який повернувся після довгої перерви, тому для таких є окрема категорія.','This is a probability based on public data, not proof: nobody can detect a smurf or a different owner with 100% certainty. Scores are the sum of signals (shown next to each). Only public matches count. The most common false alarm is a player returning after a long break, so they get their own category.','Это вероятность по открытым данным, а не доказательство: на 100% смурфа или чужой аккаунт не определит никто. Баллы — сумма сигналов (указаны возле каждого). Считаются только публичные матчи. Самая частая ошибка — игрок, вернувшийся после долгого перерыва, поэтому для таких есть отдельная категория.')}</div>`;
 
 /* інше */
 const RUNE=()=>L({0:'Подвійна шкода',1:'Прискорення',2:'Ілюзії',3:'Невидимість',4:'Регенерація',5:'Баунті',6:'Чародійство',7:'Вода',8:'Мудрість',9:'Щит'},{0:'Double Damage',1:'Haste',2:'Illusion',3:'Invisibility',4:'Regeneration',5:'Bounty',6:'Arcane',7:'Water',8:'Wisdom',9:'Shield'},{0:'Двойной урон',1:'Ускорение',2:'Иллюзии',3:'Невидимость',4:'Регенерация',5:'Баунти',6:'Чародейство',7:'Вода',8:'Мудрость',9:'Щит'});
