@@ -256,6 +256,9 @@ button.ep:hover{border-color:#343c4b}
 .sv-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font:800 14px var(--f-display)}
 .sv-h b{font:800 26px var(--f-mono)}
 .sv-h b small{font-size:12px;color:var(--muted);margin-left:2px}
+.verdict-k{margin:6px 0 14px}
+.verdict-k .smurf{margin:4px 0 6px}
+.verdict-k p{margin:0;color:var(--soft);max-width:70ch}
 .sv-t{font:800 13px var(--f-display);letter-spacing:.04em;text-transform:uppercase}
 .badge.lv{background:rgba(240,71,74,.16);color:var(--t3)}
 
@@ -1301,11 +1304,12 @@ async function loadProfile(id){
     PROF[id]={pr,wl,heroes};
   }catch(e){PROF[id]={err:e.message}}
 }
-/* детектор смурфів, чужих акаунтів і бусту */
-const SM={},PEERS={};
+/* ---------- детектор v2: смурф, куплений/чужий акаунт, буст ---------- */
+const SM={},PEERS={},PRANK={};
 function loadSmurf(id){
   if(SM[id])return SM[id].p||Promise.resolve();
-  const p=(async()=>{try{const ms=await getJson(API+`/players/${id}/matches`,null,true);SM[id]={ms:Array.isArray(ms)?ms:[]}}catch(e){SM[id]={err:e.message,rl:e.status===429}}})();
+  /* при обмеженні запитів OpenDota (429) повторюємо ще двічі з паузою */
+  const p=(async()=>{for(let t=0;t<3;t++){try{const ms=await getJson(API+`/players/${id}/matches`,null,true);SM[id]={ms:Array.isArray(ms)?ms:[]};return}catch(e){if(e.status===429&&t<2){await new Promise(r=>setTimeout(r,20000));continue}SM[id]={err:e.message,rl:e.status===429};return}}})();
   SM[id]={loading:true,p};return p;
 }
 async function smurfAll(){
@@ -1313,89 +1317,152 @@ async function smurfAll(){
   const work=async()=>{while(i<ids.length){const id=ids[i++];await loadSmurf(id);if(S&&S.m===m){renderTeams();if(S.tab==='profile'&&S.P[S.sel].account_id===id)renderTab()}}};
   await Promise.all([work(),work()]);
 }
+/* часті напарники + їхні ранги (лише у вкладці профілю — це додаткові запити) */
 async function loadPeers(id){
   if(PEERS[id])return;PEERS[id]={loading:true};
-  try{const a=await getJson(API+`/players/${id}/peers`,null,true);PEERS[id]={a:Array.isArray(a)?a:[]}}catch(e){PEERS[id]={err:e.message}}
+  try{const a=await getJson(API+`/players/${id}/peers`,null,true),list=Array.isArray(a)?a:[];
+    const top=list.filter(x=>x.with_games>=15).sort((x,y)=>y.with_games-x.with_games).slice(0,3);
+    await Promise.all(top.map(async x=>{if(PRANK[x.account_id]!==undefined)return;try{const pr=await getJson(API+`/players/${x.account_id}`,null,true);PRANK[x.account_id]=pr&&pr.rank_tier||null}catch(e){PRANK[x.account_id]=null}}));
+    PEERS[id]={a:list};
+  }catch(e){PEERS[id]={err:e.message}}
 }
 const GAMES_FOR={3:300,4:450,5:700,6:1000,7:1500,8:2200};
 const DAYS=n=>P(n,'день|дні|днів','day|days','день|дня|дней');
 const fdate=t=>new Date(t*1000).toLocaleDateString(LOC[LANG],{day:'2-digit',month:'2-digit',year:'numeric'});
+const median=a=>{if(!a.length)return null;const b=a.slice().sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const rkName=t=>{const r=rank(Math.round(t));return r?r.n:'—'};
+
 function smurfEval(p){
   const s=p.account_id&&SM[p.account_id];if(!s||s.loading||s.err)return null;
   const now=(S.m.start_time||Date.now()/1000)+3600;
   const hist=(s.ms||[]).filter(m=>m.start_time<=now).sort((a,b)=>b.start_time-a.start_time),n=hist.length;
-  if(!n)return{hidden:true};
+  if(!n)return{hidden:true,kind:'hidden'};
   const win=m=>(m.player_slot<128)===m.radiant_win;
   const wr=a=>a.length?a.filter(win).length/a.length:null;
   const kda=a=>a.length?avg(a.map(m=>((m.kills||0)+(m.assists||0))/Math.max(1,m.deaths||0))):null;
+  const R=hist.filter(m=>m.lobby_type===7),nR=R.length,rYear=R.filter(m=>m.start_time>=now-365*86400).length;
   const first=hist[n-1].start_time,ageD=Math.max(0,Math.round((now-first)/86400));
-  const r20=hist.slice(0,20),r50=hist.slice(0,50),wr20=wr(r20),wr50=wr(r50),wrAll=wr(hist),kda20=kda(r20);
+  const r20=R.slice(0,20),r100=R.slice(0,100),wr20=wr(r20),wr100=wr(r100),wrAll=wr(hist),kda20=kda(hist.slice(0,20));
   const medal=Math.floor((p.rank_tier||0)/10),rk=rank(p.rank_tier),hg=hist.filter(m=>m.hero_id===p.hero_id).length;
-  const S1=[],S2=[],add=(arr,w,t)=>arr.push({w,t});
-  /* смурф */
+  const lob=R.filter(m=>m.average_rank).slice().reverse().map(m=>[m.start_time,m.average_rank]);
+  const lobNow=median(lob.slice(-20).map(x=>x[1])),lobStart=median(lob.slice(0,20).map(x=>x[1]));
+  const base={n,nR,rYear,first,ageD,wr20,wr100,wrAll,kda20,hg,lob,lobNow,lobStart};
+  if(n<15)return{...base,kind:'few'};
+  if(nR===0||rYear===0)return{...base,kind:'turbo'};
+  const SS=[],SO=[],SB=[],add=(arr,w,t)=>arr.push({w,t});
+  /* ---- смурф ---- */
   const need=GAMES_FOR[medal];
-  if(need&&rk){const r=n/need;
-    const t=L(`Лише ${n} публічних ігор при ранзі ${rk.n} — зазвичай до нього грають ${need}+.`,`Only ${n} public games at ${rk.n} — players usually need ${need}+ to get there.`,`Всего ${n} публичных игр при ранге ${rk.n} — обычно до него играют ${need}+.`);
-    if(r<.15)add(S1,35,t);else if(r<.3)add(S1,22,t);else if(r<.5)add(S1,10,t)}
+  if(need&&rk){const r=nR/need,t=L(`Лише ${nR} рейтингових ігор при ранзі ${rk.n} — зазвичай до нього грають ${need}+.`,`Only ${nR} ranked games at ${rk.n} — players usually need ${need}+ to get there.`,`Всего ${nR} рейтинговых игр при ранге ${rk.n} — обычно до него играют ${need}+.`);
+    if(r<.15)add(SS,35,t);else if(r<.3)add(SS,22,t);else if(r<.5)add(SS,10,t)}
   if(medal>=5){const t=L(`Перша публічна гра ${ageD} ${DAYS(ageD)} тому (${fdate(first)}).`,`First public game ${ageD} ${DAYS(ageD)} ago (${fdate(first)}).`,`Первая публичная игра ${ageD} ${DAYS(ageD)} назад (${fdate(first)}).`);
-    if(ageD<30)add(S1,25,t);else if(ageD<90)add(S1,15,t);else if(ageD<180)add(S1,6,t)}
-  if(r20.length>=15&&wr20>=.65)add(S1,wr20>=.75?25:15,L(`Вінрейт ${pct(wr20)} в останніх ${r20.length} іграх (норма — близько 50%).`,`${pct(wr20)} win rate over the last ${r20.length} games (normal is about 50%).`,`Винрейт ${pct(wr20)} в последних ${r20.length} играх (норма — около 50%).`));
-  if(r50.length>=40&&wr50>=.62)add(S1,10,L(`Вінрейт ${pct(wr50)} в останніх ${r50.length} іграх.`,`${pct(wr50)} win rate over the last ${r50.length} games.`,`Винрейт ${pct(wr50)} в последних ${r50.length} играх.`));
-  if(kda20!=null&&kda20>=4)add(S1,kda20>=5?10:5,L(`Середній KDA ${dec(kda20)} в останніх іграх.`,`Average KDA ${dec(kda20)} in recent games.`,`Средний KDA ${dec(kda20)} в последних играх.`));
+    if(ageD<30)add(SS,20,t);else if(ageD<90)add(SS,12,t);else if(ageD<180)add(SS,5,t)}
+  if(p.rank_tier&&lobNow!=null&&lob.length>=10){const gap=lobNow-p.rank_tier;
+    if(gap>=8)add(SS,gap>=15?20:10,L(`Останні ігри в лобі рівня ${rkName(lobNow)}, а медаль лише ${rk.n}: справжній рейтинг вищий за медаль.`,`Recent games are in ${rkName(lobNow)} lobbies while the medal is only ${rk.n}: the real rating is above the medal.`,`Последние игры в лобби уровня ${rkName(lobNow)}, а медаль всего ${rk.n}: настоящий рейтинг выше медали.`))}
+  if(lob.length>=40&&lobNow!=null&&lobStart!=null){const per100=(lobNow-lobStart)/(nR/100);
+    if(per100>=6&&nR<=500)add(SS,per100>=10?20:10,L(`Швидкий ріст: з ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтингових ігор.`,`Fast climb: from ${rkName(lobStart)} to ${rkName(lobNow)} in ${nR} ranked games.`,`Быстрый рост: с ${rkName(lobStart)} до ${rkName(lobNow)} за ${nR} рейтинговых игр.`))}
+  if(r100.length>=60&&wr100>=.56)add(SS,wr100>=.6?15:6,L(`Вінрейт ${pct(wr100)} на дистанції ${r100.length} рейтингових ігор (норма — близько 50%).`,`${pct(wr100)} win rate over ${r100.length} ranked games (normal is about 50%).`,`Винрейт ${pct(wr100)} на дистанции ${r100.length} рейтинговых игр (норма — около 50%).`));
+  if(r20.length>=15&&wr20>=.65)add(SS,wr20>=.75?20:12,L(`Вінрейт ${pct(wr20)} в останніх ${r20.length} рейтингових іграх.`,`${pct(wr20)} win rate over the last ${r20.length} ranked games.`,`Винрейт ${pct(wr20)} в последних ${r20.length} рейтинговых играх.`));
+  if(kda20!=null&&kda20>=5)add(SS,8,L(`Середній KDA ${dec(kda20)} в останніх іграх.`,`Average KDA ${dec(kda20)} in recent games.`,`Средний KDA ${dec(kda20)} в последних играх.`));
   const perf=avg([bp(p,'gold_per_min'),bp(p,'hero_damage_per_min'),bp(p,'xp_per_min'),bp(p,'last_hits_per_min')]);
-  if(perf!=null&&perf>=.8)add(S1,perf>=.9?12:6,L(`У цьому матчі фарм і шкода кращі, ніж у ${pct(perf)} гравців на ${H(p)}.`,`In this match farm and damage beat ${pct(perf)} of ${H(p)} players.`,`В этом матче фарм и урон лучше, чем у ${pct(perf)} игроков на ${H(p)}.`));
-  if(perf!=null&&perf>=.8&&hg<=5)add(S1,8,L(`Лише ${hg} ${P(hg,'гра|гри|ігор')} на ${H(p)}, а грає як досвідчений.`,`Only ${hg} ${P(hg,'','game|games')} on ${H(p)}, yet plays like a veteran.`,`Всего ${hg} ${P(hg,'','','игра|игры|игр')} на ${H(p)}, а играет как опытный.`));
-  if(r50.length>=30){const c={};r50.forEach(m=>c[m.hero_id]=(c[m.hero_id]||0)+1);const top3=Object.values(c).sort((a,b)=>b-a).slice(0,3).reduce((a,b)=>a+b,0)/r50.length;
-    if(top3>=.7)add(S1,5,L(`${pct(top3)} останніх ігор — на трьох героях.`,`${pct(top3)} of recent games on just three heroes.`,`${pct(top3)} последних игр — на трёх героях.`))}
-  /* чужий / куплений акаунт */
+  if(perf!=null&&perf>=.8)add(SS,perf>=.9?10:5,L(`У цьому матчі фарм і шкода кращі, ніж у ${pct(perf)} гравців на ${H(p)}.`,`In this match farm and damage beat ${pct(perf)} of ${H(p)} players.`,`В этом матче фарм и урон лучше, чем у ${pct(perf)} игроков на ${H(p)}.`));
+  if(perf!=null&&perf>=.8&&hg<=5)add(SS,8,L(`Лише ${hg} ${P(hg,'гра|гри|ігор')} на ${H(p)}, а грає як досвідчений.`,`Only ${hg} ${P(hg,'','game|games')} on ${H(p)}, yet plays like a veteran.`,`Всего ${hg} ${P(hg,'','','игра|игры|игр')} на ${H(p)}, а играет как опытный.`));
+  if(p.A&&p.A.lane&&p.A.lane.s>=85)add(SS,6,L(`Дуже впевнена лінія в цьому матчі (${Math.round(p.A.lane.s)}/100), нетипово для рангу.`,`Very confident laning in this match (${Math.round(p.A.lane.s)}/100), unusual for the rank.`,`Очень уверенная линия в этом матче (${Math.round(p.A.lane.s)}/100), нетипично для ранга.`));
+  /* ---- куплений / чужий акаунт ---- */
   const asc=hist.slice().reverse();let gi=-1,gap=0;
-  for(let i=1;i<asc.length;i++){const g=asc[i].start_time-asc[i-1].start_time,after=asc.length-i;if(g>gap&&after>=15&&i>=30){gap=g;gi=i}}
+  for(let i=1;i<asc.length;i++){const g=asc[i].start_time-asc[i-1].start_time;if(g>gap&&asc.length-i>=15&&i>=30&&asc[i].start_time>=now-730*86400){gap=g;gi=i}}
   const heroSet=a=>{const c={};a.forEach(m=>c[m.hero_id]=(c[m.hero_id]||0)+1);return new Set(Object.entries(c).filter(([,v])=>v>=2).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([k])=>k))};
   const jac=(A,B)=>{const u=new Set([...A,...B]);if(!u.size)return 1;let x=0;A.forEach(h=>{if(B.has(h))x++});return x/u.size};
-  let split=null;
+  let split=null,returning=false;
   if(gi>0&&gap>=120*86400){
-    const before=asc.slice(Math.max(0,gi-150),gi),after=asc.slice(gi),gd=Math.round(gap/86400);
-    split={before,after,from:asc[gi-1].start_time,to:asc[gi].start_time,days:gd};
-    add(S2,10,L(`Перерва ${gd} ${DAYS(gd)}: з ${fdate(split.from)} до ${fdate(split.to)}.`,`A ${gd}-day break: from ${fdate(split.from)} to ${fdate(split.to)}.`,`Перерыв ${gd} ${DAYS(gd)}: с ${fdate(split.from)} до ${fdate(split.to)}.`));
-    const o=jac(heroSet(before),heroSet(after));
-    if(o<.3)add(S2,o<.15?25:12,L(`Після перерви грає майже інших героїв (збіг ${pct(o)}).`,`After the break plays almost different heroes (overlap ${pct(o)}).`,`После перерыва играет почти других героев (совпадение ${pct(o)}).`));
-    const dw=wr(after)-wr(before);
-    if(Math.abs(dw)>=.15)add(S2,dw>0?15:10,L(`Вінрейт ${dw>0?'зріс':'впав'} з ${pct(wr(before))} до ${pct(wr(after))}.`,`Win rate ${dw>0?'rose':'dropped'} from ${pct(wr(before))} to ${pct(wr(after))}.`,`Винрейт ${dw>0?'вырос':'упал'} с ${pct(wr(before))} до ${pct(wr(after))}.`));
-    const kr=kda(after)/Math.max(.1,kda(before));
-    if(kr>=1.6||kr<=.6)add(S2,kr>=1.6?10:8,L(`KDA змінився з ${dec(kda(before))} на ${dec(kda(after))}.`,`KDA changed from ${dec(kda(before))} to ${dec(kda(after))}.`,`KDA изменился с ${dec(kda(before))} на ${dec(kda(after))}.`));
+    /* рівні вікна: 100 ігор до перерви і перші 100 після */
+    const before=asc.slice(Math.max(0,gi-100),gi),after=asc.slice(gi,gi+100),gd=Math.round(gap/86400);
+    const o=jac(heroSet(before),heroSet(after)),dw=wr(after)-wr(before),kr=kda(after)/Math.max(.1,kda(before));
+    split={before,after,from:asc[gi-1].start_time,to:asc[gi].start_time,days:gd,o,dw};
+    const heroCh=o<.2,perfCh=Math.abs(dw)>=.15||kr>=1.6||kr<=.6;
+    if(o>=.35&&!perfCh)returning=true;
+    else if(heroCh||perfCh){
+      add(SO,8,L(`Перерва ${gd} ${DAYS(gd)}: з ${fdate(split.from)} до ${fdate(split.to)}.`,`A ${gd}-day break: from ${fdate(split.from)} to ${fdate(split.to)}.`,`Перерыв ${gd} ${DAYS(gd)}: с ${fdate(split.from)} до ${fdate(split.to)}.`));
+      const both=heroCh&&perfCh;
+      if(heroCh)add(SO,both?15:8,L(`Після перерви грає майже інших героїв (збіг ${pct(o)})${both?'':' — це може бути і нова мета'}.`,`After the break plays almost different heroes (overlap ${pct(o)})${both?'':' — could also be a new meta'}.`,`После перерыва играет почти других героев (совпадение ${pct(o)})${both?'':' — это может быть и новая мета'}.`));
+      if(Math.abs(dw)>=.15)add(SO,both?12:6,L(`Вінрейт ${dw>0?'зріс':'впав'} з ${pct(wr(before))} до ${pct(wr(after))}.`,`Win rate ${dw>0?'rose':'dropped'} from ${pct(wr(before))} to ${pct(wr(after))}.`,`Винрейт ${dw>0?'вырос':'упал'} с ${pct(wr(before))} до ${pct(wr(after))}.`));
+      if(kr>=1.6||kr<=.6)add(SO,both?10:5,L(`KDA змінився з ${dec(kda(before))} на ${dec(kda(after))}.`,`KDA changed from ${dec(kda(before))} to ${dec(kda(after))}.`,`KDA изменился с ${dec(kda(before))} на ${dec(kda(after))}.`));
+    }
   }else if(n>=240){
     const recent=hist.slice(0,40),prev=hist.slice(40,240),o=jac(heroSet(recent),heroSet(prev)),dw=wr(recent)-wr(prev);
-    if(o<.12&&Math.abs(dw)>=.15)add(S2,20,L(`Останні 40 ігор — зовсім інші герої (збіг ${pct(o)}) і вінрейт ${pct(wr(recent))} проти ${pct(wr(prev))} раніше.`,`The last 40 games use completely different heroes (overlap ${pct(o)}) with ${pct(wr(recent))} win rate vs ${pct(wr(prev))} before.`,`Последние 40 игр — совсем другие герои (совпадение ${pct(o)}) и винрейт ${pct(wr(recent))} против ${pct(wr(prev))} раньше.`));
+    if(o<.12&&Math.abs(dw)>=.15)add(SO,20,L(`Останні 40 ігор — зовсім інші герої (збіг ${pct(o)}) і вінрейт ${pct(wr(recent))} проти ${pct(wr(prev))} раніше.`,`The last 40 games use completely different heroes (overlap ${pct(o)}) with ${pct(wr(recent))} win rate vs ${pct(wr(prev))} before.`,`Последние 40 игр — совсем другие герои (совпадение ${pct(o)}) и винрейт ${pct(wr(recent))} против ${pct(wr(prev))} раньше.`));
   }
-  if(ageD>3*365&&n<400&&medal>=5)add(S2,10,L(`Акаунту понад ${Math.floor(ageD/365)} років, але лише ${n} публічних ігор.`,`The account is over ${Math.floor(ageD/365)} years old but has only ${n} public games.`,`Аккаунту больше ${Math.floor(ageD/365)} лет, но всего ${n} публичных игр.`));
-  if(p.party_id!=null&&p.rank_tier){const hi=p.team.filter(q=>q!==p&&q.party_id===p.party_id&&q.rank_tier&&q.rank_tier>=p.rank_tier+10).sort((a,b)=>b.rank_tier-a.rank_tier).slice(0,1);
-    hi.forEach(q=>add(S2,q.rank_tier>=p.rank_tier+20?20:10,L(`Грає в паті з ${pname(q)} (${rank(q.rank_tier).n}) — рангом значно вищим, схоже на буст.`,`In a party with ${pname(q)} (${rank(q.rank_tier).n}) — a much higher rank, looks like boosting.`,`Играет в пати с ${pname(q)} (${rank(q.rank_tier).n}) — рангом значительно выше, похоже на буст.`)))}
-  const sc=a=>Math.min(100,a.reduce((x,y)=>x+y.w,0));
-  const s1=sc(S1),s2=sc(S2);
-  const v1=s1>=60?{c:3,t:L('Майже напевно смурф','Almost certainly a smurf','Почти наверняка смурф'),b:L('СМУРФ','SMURF','СМУРФ')}:s1>=35?{c:2,t:L('Ймовірно смурф','Probably a smurf','Вероятно смурф'),b:L('СМУРФ?','SMURF?','СМУРФ?')}:s1>=15?{c:1,t:L('Є підозри','Some suspicion','Есть подозрения')}:{c:0,t:L('Схоже на звичайний акаунт','Looks like a regular account','Похоже на обычный аккаунт')};
-  const v2=s2>=45?{c:3,t:L('Схоже, грає не власник або буст','Looks like a different player or boosting','Похоже, играет не владелец или буст'),b:L('ЧУЖИЙ?','NOT OWNER?','ЧУЖОЙ?')}:s2>=25?{c:2,t:L('Можлива зміна власника або буст','Possible owner change or boosting','Возможна смена владельца или буст')}:{c:0,t:L('Ознак чужого акаунта немає','No signs of a different owner','Признаков чужого аккаунта нет')};
-  return{n,first,ageD,wr20,wr50,wrAll,kda20,hg,split,smurf:{s:s1,v:v1,sig:S1.sort((a,b)=>b.w-a.w)},acct:{s:s2,v:v2,sig:S2.sort((a,b)=>b.w-a.w)}};
+  if(ageD>3*365&&n<400&&medal>=5)add(SO,10,L(`Акаунту понад ${Math.floor(ageD/365)} років, але лише ${n} публічних ігор.`,`The account is over ${Math.floor(ageD/365)} years old but has only ${n} public games.`,`Аккаунту больше ${Math.floor(ageD/365)} лет, но всего ${n} публичных игр.`));
+  /* ---- буст ---- */
+  if(p.party_id!=null&&p.rank_tier){const q=p.team.filter(q=>q!==p&&q.party_id===p.party_id&&q.rank_tier&&q.rank_tier>=p.rank_tier+10).sort((a,b)=>b.rank_tier-a.rank_tier)[0];
+    if(q)add(SB,q.rank_tier>=p.rank_tier+20?25:12,L(`У цьому матчі в паті з ${pname(q)} (${rank(q.rank_tier).n}) — рангом значно вищим.`,`In this match partied with ${pname(q)} (${rank(q.rank_tier).n}) — a much higher rank.`,`В этом матче в пати с ${pname(q)} (${rank(q.rank_tier).n}) — рангом значительно выше.`))}
+  const pr=R.slice(0,200),pty=pr.filter(m=>(m.party_size||1)>1),solo=pr.filter(m=>(m.party_size||1)<=1);
+  if(pty.length>=20&&solo.length>=20){const d=wr(pty)-wr(solo);
+    if(d>=.15)add(SB,d>=.22?20:12,L(`У паті вигрує ${pct(wr(pty))}, а соло лише ${pct(wr(solo))} — рейтинг тримається на напарниках.`,`Wins ${pct(wr(pty))} in a party but only ${pct(wr(solo))} solo — the rating rests on teammates.`,`В пати выигрывает ${pct(wr(pty))}, а соло всего ${pct(wr(solo))} — рейтинг держится на напарниках.`))}
+  const pe=PEERS[p.account_id];
+  if(pe&&pe.a&&p.rank_tier){for(const x of pe.a.filter(x=>x.with_games>=15).sort((a,b)=>b.with_games-a.with_games).slice(0,3)){
+    const r=PRANK[x.account_id],share=x.with_games/n;
+    if(r&&r>=p.rank_tier+10&&share>=.2)add(SB,r>=p.rank_tier+15&&share>=.3?25:12,L(`${pct(share)} ігор у паті з ${x.personaname||'#'+x.account_id} (${rank(r).n}).`,`${pct(share)} of games in a party with ${x.personaname||'#'+x.account_id} (${rank(r).n}).`,`${pct(share)} игр в пати с ${x.personaname||'#'+x.account_id} (${rank(r).n}).`))}}
+  /* ---- підсумок ---- */
+  const sc=a=>Math.min(100,a.reduce((x,y)=>x+y.w,0)),s1=sc(SS),s3=sc(SB);
+  /* на акаунтах з тисячами рейтингових ігор зміна власника малоймовірна: зменшуємо бал */
+  const s2=Math.round(sc(SO)*(nR>=5000?.6:nR>=3000?.8:1));
+  const box=(s,arr,hi,mid,tHi,tMid,tLo)=>({s,sig:arr.sort((a,b)=>b.w-a.w),v:s>=hi?{c:3,t:tHi}:s>=mid?{c:2,t:tMid}:s>=15?{c:1,t:L('Є дрібні підозри','Minor suspicion','Есть мелкие подозрения')}:{c:0,t:tLo}});
+  const smurf=box(s1,SS,60,35,L('Майже напевно смурф','Almost certainly a smurf','Почти наверняка смурф'),L('Ймовірно смурф','Probably a smurf','Вероятно смурф'),L('Не схоже на смурфа','Doesn’t look like a smurf','Не похоже на смурфа'));
+  const acct=box(s2,SO,45,25,L('Схоже, грає не власник','Looks like a different player','Похоже, играет не владелец'),L('Можлива зміна власника','Possible owner change','Возможна смена владельца'),L('Ознак чужого акаунта немає','No signs of a different owner','Признаков чужого аккаунта нет'));
+  const boost=box(s3,SB,45,25,L('Схоже на буст','Looks like boosting','Похоже на буст'),L('Можливий буст','Possible boosting','Возможный буст'),L('Ознак бусту немає','No signs of boosting','Признаков буста нет'));
+  const top=[['smurf',s1,60],['acct',s2,45],['boost',s3,45]].sort((a,b)=>b[1]/b[2]-a[1]/a[2])[0];
+  let kind='clean';
+  if(top[1]>=top[2])kind=top[0];else if(top[1]>=25)kind='sus';else if(returning)kind='returning';
+  return{...base,kind,split,returning,smurf,acct,boost};
 }
+const KIND=k=>({
+  smurf:{c:3,t:L('Смурф','Smurf','Смурф'),d:L('Гравець, схоже, значно сильніший, ніж каже медаль акаунта.','The player seems much stronger than the account’s medal says.','Игрок, похоже, значительно сильнее, чем говорит медаль аккаунта.')},
+  acct:{c:3,t:L('Куплений або чужий акаунт','Bought or someone else’s account','Купленный или чужой аккаунт'),d:L('Старий акаунт, на якому, схоже, грає інша людина: змінилися герої, вінрейт і манера гри.','An old account that someone else seems to be playing: heroes, win rate and style changed.','Старый аккаунт, на котором, похоже, играет другой человек: изменились герои, винрейт и манера игры.')},
+  boost:{c:3,t:L('Буст','Boosting','Буст'),d:L('Рейтинг, схоже, піднімали з чужою допомогою — у паті з набагато сильнішими гравцями.','The rating seems to have been raised with help — in parties with much stronger players.','Рейтинг, похоже, поднимали с чужой помощью — в пати с гораздо более сильными игроками.')},
+  sus:{c:2,t:L('Підозрілий','Suspicious','Подозрительный'),d:L('Є аномалії, але їх замало для впевненого висновку.','There are anomalies, but not enough for a confident verdict.','Есть аномалии, но их недостаточно для уверенного вывода.')},
+  returning:{c:1,t:L('Повернувся після перерви','Returning player','Вернувшийся игрок'),d:L('Довго не грав і повернувся, але герої й результати ті самі — схоже на того самого власника.','Took a long break and came back, but heroes and results are the same — looks like the same owner.','Долго не играл и вернулся, но герои и результаты те же — похоже на того же владельца.')},
+  clean:{c:0,t:L('Чистий','Clean','Чистый'),d:L('Акаунт виглядає як основний: кількість ігор, ріст і оточення відповідають рангу.','The account looks like a main: games played, growth and party match the rank.','Аккаунт выглядит как основной: число игр, рост и окружение соответствуют рангу.')},
+  turbo:{c:1,t:L('Турбо-гравець','Turbo player','Турбо-игрок'),d:L('Рейтингових ігор за рік немає — оцінювати нічого.','No ranked games in the past year — nothing to judge.','Рейтинговых игр за год нет — оценивать нечего.')},
+  few:{c:1,t:L('Не впевнені','Not sure','Не уверены'),d:L('Замало публічних матчів для висновку.','Too few public matches for a verdict.','Слишком мало публичных матчей для вывода.')},
+  hidden:{c:1,t:L('Не впевнені','Not sure','Не уверены'),d:L('Гравець приховав статистику матчів у налаштуваннях Dota — перевірити неможливо. Так часто роблять смурфи, але й звичайні гравці теж.','The player hid match data in Dota settings — it can’t be checked. Smurfs often do this, but so do regular players.','Игрок скрыл статистику матчей в настройках Dota — проверить невозможно. Так часто делают смурфы, но и обычные игроки тоже.')}
+})[k];
 function smurfBadge(p){
   if(!p.account_id)return '';
   const s=SM[p.account_id];
   if(!s||s.loading)return `<span class="badge sml" title="${esc(L('Перевіряю на смурфа…','Checking for smurf…','Проверяю на смурфа…'))}">···</span>`;
   if(s.err)return '';
   const e=smurfEval(p);if(!e)return '';
-  if(e.hidden)return `<span class="badge smh" title="${esc(L('Статистика матчів прихована','Match data is hidden','Статистика матчей скрыта'))}">${L('ПРИХ.','HIDDEN','СКРЫТ.')}</span>`;
+  if(e.kind==='hidden')return `<span class="badge smh" title="${esc(KIND('hidden').d)}">${L('ПРИХ.','HIDDEN','СКРЫТ.')}</span>`;
+  if(e.kind==='turbo'||e.kind==='few')return '';
   let h='';
-  if(e.smurf.v.b)h+=`<span class="badge ${e.smurf.v.c>=3?'sm':'sm2'}" title="${esc(e.smurf.v.t+' · '+e.smurf.s+'/100')}">${e.smurf.v.b}</span>`;
-  if(e.acct.v.b)h+=`<span class="badge sm" title="${esc(e.acct.v.t+' · '+e.acct.s+'/100')}">${e.acct.v.b}</span>`;
+  if(e.smurf.s>=35)h+=`<span class="badge ${e.smurf.s>=60?'sm':'sm2'}" title="${esc(e.smurf.v.t+' · '+e.smurf.s+'/100')}">${e.smurf.s>=60?L('СМУРФ','SMURF','СМУРФ'):L('СМУРФ?','SMURF?','СМУРФ?')}</span>`;
+  if(e.acct.s>=45)h+=`<span class="badge sm" title="${esc(e.acct.v.t+' · '+e.acct.s+'/100')}">${L('ЧУЖИЙ?','NOT OWNER?','ЧУЖОЙ?')}</span>`;
+  if(e.boost.s>=45)h+=`<span class="badge sm2" title="${esc(e.boost.v.t+' · '+e.boost.s+'/100')}">${L('БУСТ?','BOOST?','БУСТ?')}</span>`;
   return h;
 }
 function verdictBox(title,o){
   return `<div class="sv"><div class="sv-h"><span>${title}</span><b class="c${o.v.c}">${o.s}<small>/100</small></b></div><div class="meter c${o.v.c}"><i style="--w:${Math.max(2,o.s)}%"></i></div><div class="sv-t c${o.v.c}">${esc(o.v.t)}</div>
   ${o.sig.length?`<ul class="facts sm">${o.sig.map(x=>`<li class="${x.w>=15?'bad':'info'}"><span>${esc(x.t)} <span class="mono" style="color:var(--muted)">+${x.w}</span></span></li>`).join('')}</ul>`:`<div class="empty">${L('Сигналів не знайдено.','No signals found.','Сигналов не найдено.')}</div>`}</div>`;
 }
+/* графік рівня лобі: як змінювався реальний рівень ігор гравця */
+function lobbyChart(e,p){
+  const pts=e.lob;if(pts.length<10)return '';
+  const step=Math.max(1,Math.ceil(pts.length/220)),sm=[];
+  for(let i=0;i<pts.length;i+=step){const ch=pts.slice(Math.max(0,i-4),i+5).map(x=>x[1]);sm.push([pts[i][0],avg(ch)])}
+  const W=600,Hh=150,Lp=58,Rp=10,T=10,B=22,vals=sm.map(x=>x[1]).concat(p.rank_tier?[p.rank_tier]:[]);
+  const lo=Math.max(10,Math.floor((Math.min(...vals)-3)/10)*10),hi=Math.min(85,Math.ceil((Math.max(...vals)+3)/10)*10);
+  const x=i=>Lp+i/(sm.length-1)*(W-Lp-Rp),y=v=>T+(1-(v-lo)/(hi-lo))*(Hh-T-B);
+  let g='';for(let v=lo;v<=hi;v+=10){const nm=RANKS[Math.floor(v/10)+0]||'';g+=`<line class="g-axis" x1="${Lp}" x2="${W-Rp}" y1="${y(v)}" y2="${y(v)}" opacity=".6"/>${v<hi?`<text class="g-txt" x="${Lp-6}" y="${(y(v)+y(v+10))/2+4}" text-anchor="end">${RANKS[Math.floor(v/10)]||''}</text>`:''}`}
+  const line=sm.map((q,i)=>`${x(i).toFixed(1)},${y(q[1]).toFixed(1)}`).join(' ');
+  const me=p.rank_tier?`<line x1="${Lp}" x2="${W-Rp}" y1="${y(p.rank_tier)}" y2="${y(p.rank_tier)}" stroke="var(--t3)" stroke-dasharray="4 4" stroke-width="1.2"/>`:'';
+  return `<div class="sec-h"><h3>${L('Рівень лобі гра за грою','Lobby level game by game','Уровень лобби игра за игрой')}</h3><small>${L('рейтингові ігри, від перших до останніх','ranked games, oldest to newest','рейтинговые игры, от первых к последним')}</small></div>
+  <div class="graph"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${L('Рівень лобі','Lobby level','Уровень лобби')}">${g}${me}<polyline points="${line}" fill="none" stroke="var(--tape)" stroke-width="2" stroke-linejoin="round"/><text class="g-txt" x="${Lp}" y="${Hh-6}">${fdate(sm[0][0])}</text><text class="g-txt" x="${W-Rp}" y="${Hh-6}" text-anchor="end">${fdate(sm[sm.length-1][0])}</text></svg></div>
+  <div class="legend"><span><i style="background:var(--tape)"></i>${L('середній ранг гравців у його іграх','average rank of players in their games','средний ранг игроков в его играх')}</span>${p.rank_tier?`<span><i style="background:var(--t3)"></i>${L('його медаль зараз','their current medal','его медаль сейчас')}: ${rank(p.rank_tier).n}</span>`:''}</div>`;
+}
 function profileHtml(p){
   if(!p.account_id)return `<div class="empty" style="padding-top:18px">${L('Гравець грає анонімно, тому його історію перевірити неможливо.','This player is anonymous, so their history can’t be checked.','Игрок играет анонимно, поэтому его историю проверить невозможно.')}</div>`;
   const id=p.account_id,d=PROF[id],s=SM[id],pe=PEERS[id];
-  const again=()=>{if(S&&S.tab==='profile'&&S.P[S.sel].account_id===id)renderTab()};
+  const again=()=>{if(S&&S.tab==='profile'&&S.P[S.sel].account_id===id){renderTab();renderTeams()}};
   if(!d)loadProfile(id).then(again);
   if(!s)loadSmurf(id).then(again);
   if(!pe)loadPeers(id).then(again);
@@ -1403,21 +1470,24 @@ function profileHtml(p){
   if(d.err&&s.err)return `<div class="empty" style="padding-top:18px">${esc(d.err)}</div>`;
   const prof=d.pr&&d.pr.profile||{},rk=rank(d.pr&&d.pr.rank_tier||p.rank_tier),e=s.err?null:smurfEval(p);
   let h=`<div class="prof">${prof.avatarfull?`<img src="${esc(prof.avatarfull)}" alt="">`:''}<div><b><a href="https://www.opendota.com/players/${id}" target="_blank" rel="noopener">${esc(prof.personaname||pname(p))}</a></b><div class="who-line" style="margin:4px 0 0">${rk?`<span class="rank"><img src="${rk.img}" alt="" onerror="this.remove()">${rk.n}</span>`:''}<span>ID ${id}</span></div></div></div>`;
-  if(s.err)h+=`<div class="empty">${esc(s.err)}</div>`;
-  else if(e&&e.hidden)h+=`<div class="notice" style="margin-top:6px"><p>${L('<b>Статистика матчів прихована.</b> Гравець вимкнув публічні дані в налаштуваннях Dota, тому перевірити його неможливо. Так часто роблять смурфи, але й звичайні гравці теж.','<b>Match data is hidden.</b> The player turned off public match data in Dota settings, so they can’t be checked. Smurfs often do this, but so do regular players.','<b>Статистика матчей скрыта.</b> Игрок отключил публичные данные в настройках Dota, поэтому проверить его невозможно. Так часто делают смурфы, но и обычные игроки тоже.')}</p></div>`;
-  else if(e){
-    h+=`<div class="svs">${verdictBox(L('Смурф','Smurf','Смурф'),e.smurf)}${verdictBox(L('Чужий / куплений акаунт, буст','Different owner / bought account, boosting','Чужой / купленный аккаунт, буст'),e.acct)}</div>`;
-    const tiles=[[L('Публічних ігор','Public games','Публичных игр'),num(e.n)],[L('Перша гра','First game','Первая игра'),fdate(e.first)],[L('Вік акаунта','Account age','Возраст аккаунта'),e.ageD>=365?`${dec(e.ageD/365)} ${L('р.','yr','г.')}`:`${e.ageD} ${DAYS(e.ageD)}`],[L('Вінрейт: 20 / 50 / усі','Win rate: 20 / 50 / all','Винрейт: 20 / 50 / все'),[e.wr20,e.wr50,e.wrAll].map(x=>x!=null?pct(x):'—').join(' / ')],[L('KDA (20 ігор)','KDA (20 games)','KDA (20 игр)'),e.kda20!=null?dec(e.kda20):'—'],[L(`Ігор на ${H(p)}`,`Games on ${H(p)}`,`Игр на ${H(p)}`),e.hg]];
-    h+=`<div class="tiles" style="margin-top:16px">${tiles.map(([l,x])=>`<div><small>${esc(l)}</small><b>${esc(x)}</b></div>`).join('')}</div>`;
-    if(e.split){const top=a=>{const c={};a.forEach(m=>c[m.hero_id]=(c[m.hero_id]||0)+1);return Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,6)};
-      const row=a=>`<div class="heroes-row">${top(a).map(([hid,k])=>{const hh=HEROES[hid];return hh?`<span><img src="${STEAM+hh.img}" alt="">${esc(hh.n)} ×${k}</span>`:''}).join('')}</div>`;
-      h+=`<div class="sec-h"><h3>${L('Герої до і після перерви','Heroes before and after the break','Герои до и после перерыва')}</h3><small>${e.split.days} ${DAYS(e.split.days)}</small></div><div class="sub-h">${L('До','Before','До')} ${fdate(e.split.from)}</div>${row(e.split.before)}<div class="sub-h">${L('Після','After','После')} ${fdate(e.split.to)}</div>${row(e.split.after)}`}
-  }
+  if(s.err){h+=`<div class="empty">${esc(s.err)}</div>`;return h}
+  if(!e)return h;
+  const K=KIND(e.kind);
+  h+=`<div class="verdict-k"><div class="smurf c${K.c}">${esc(K.t)}</div><p>${esc(K.d)}</p></div>`;
+  if(e.kind==='hidden'||e.kind==='few')return h+smurfNote();
+  if(e.kind!=='turbo')h+=`<div class="svs">${verdictBox(L('Смурф','Smurf','Смурф'),e.smurf)}${verdictBox(L('Куплений / чужий акаунт','Bought / someone else’s account','Купленный / чужой аккаунт'),e.acct)}${verdictBox(L('Буст','Boosting','Буст'),e.boost)}</div>`;
+  if(pe&&pe.loading)h+=loadingHtml(L('Перевіряю напарників…','Checking frequent teammates…','Проверяю напарников…'));
+  const tiles=[[L('Рейтингових ігор','Ranked games','Рейтинговых игр'),num(e.nR)],[L('Усього публічних','All public','Всего публичных'),num(e.n)],[L('Перша гра','First game','Первая игра'),fdate(e.first)],[L('Вік акаунта','Account age','Возраст аккаунта'),e.ageD>=365?`${dec(e.ageD/365)} ${L('р.','yr','г.')}`:`${e.ageD} ${DAYS(e.ageD)}`],[L('Вінрейт: 20 / 100 рейт.','Win rate: 20 / 100 ranked','Винрейт: 20 / 100 рейт.'),[e.wr20,e.wr100].map(x=>x!=null?pct(x):'—').join(' / ')],[L('KDA (20 ігор)','KDA (20 games)','KDA (20 игр)'),e.kda20!=null?dec(e.kda20):'—'],[L('Рівень лобі: тоді → зараз','Lobby level: then → now','Уровень лобби: тогда → сейчас'),e.lobStart!=null&&e.lobNow!=null?`${rkName(e.lobStart)} → ${rkName(e.lobNow)}`:'—'],[L(`Ігор на ${H(p)}`,`Games on ${H(p)}`,`Игр на ${H(p)}`),e.hg]];
+  h+=`<div class="tiles" style="margin-top:16px">${tiles.map(([l,x])=>`<div><small>${esc(l)}</small><b>${esc(x)}</b></div>`).join('')}</div>`;
+  h+=lobbyChart(e,p);
+  if(e.split){const top=a=>{const c={};a.forEach(m=>c[m.hero_id]=(c[m.hero_id]||0)+1);return Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,6)};
+    const row=a=>`<div class="heroes-row">${top(a).map(([hid,k])=>{const hh=HEROES[hid];return hh?`<span><img src="${STEAM+hh.img}" alt="">${esc(hh.n)} ×${k}</span>`:''}).join('')}</div>`;
+    h+=`<div class="sec-h"><h3>${L('Герої до і після перерви','Heroes before and after the break','Герои до и после перерыва')}</h3><small>${e.split.days} ${DAYS(e.split.days)} · ${L('збіг героїв','hero overlap','совпадение героев')} ${pct(e.split.o)}</small></div><div class="sub-h">${L('До','Before','До')} ${fdate(e.split.from)}</div>${row(e.split.before)}<div class="sub-h">${L('Після','After','После')} ${fdate(e.split.to)}</div>${row(e.split.after)}`}
   if(pe&&pe.a){const top=pe.a.filter(x=>x.with_games>=5).sort((a,b)=>b.with_games-a.with_games).slice(0,6);
-    if(top.length)h+=`<div class="sec-h"><h3>${L('З ким грає найчастіше','Plays most often with','С кем играет чаще всего')}</h3></div><div class="hbars">${top.map(x=>`<div class="hbar c1"><span class="who"><a href="https://www.opendota.com/players/${x.account_id}" target="_blank" rel="noopener" style="color:inherit">${esc(x.personaname||('#'+x.account_id))}</a></span><span class="bar"><i style="--w:${Math.round(x.with_games/top[0].with_games*100)}%"></i></span><span class="v">${x.with_games} · ${pct(x.with_win/x.with_games)}</span></div>`).join('')}</div>`}
-  h+=`<div class="note">${L('Це ймовірність за відкритими даними, а не доказ: на 100% смурфа чи чужий акаунт не визначить ніхто. Бали — сума сигналів (у дужках біля кожного). Враховуються лише публічні матчі; якщо гравець приховав статистику, перевірки немає.','This is a probability based on public data, not proof: nobody can detect a smurf or a different owner with 100% certainty. The score is the sum of signals (shown next to each). Only public matches count; if the player hid their data, there’s no check.','Это вероятность по открытым данным, а не доказательство: на 100% смурфа или чужой аккаунт не определит никто. Баллы — сумма сигналов (указаны возле каждого). Учитываются только публичные матчи; если игрок скрыл статистику, проверки нет.')}</div>`;
-  return h;
+    if(top.length)h+=`<div class="sec-h"><h3>${L('З ким грає найчастіше','Plays most often with','С кем играет чаще всего')}</h3><small>${L('ігор разом · вінрейт разом','games together · win rate together','игр вместе · винрейт вместе')}</small></div><div class="hbars">${top.map(x=>{const r=PRANK[x.account_id];return `<div class="hbar c1"><span class="who"><a href="https://www.opendota.com/players/${x.account_id}" target="_blank" rel="noopener" style="color:inherit">${esc(x.personaname||('#'+x.account_id))}</a>${r?` <small style="color:var(--muted)">${rank(r).n}</small>`:''}</span><span class="bar"><i style="--w:${Math.round(x.with_games/top[0].with_games*100)}%"></i></span><span class="v">${x.with_games} · ${pct(x.with_win/x.with_games)}</span></div>`}).join('')}</div>`}
+  return h+smurfNote();
 }
+const smurfNote=()=>`<div class="note">${L('Це ймовірність за відкритими даними, а не доказ: на 100% смурфа чи чужий акаунт не визначить ніхто. Бали — сума сигналів (вказані біля кожного). Рахуються лише публічні матчі. Найчастіша помилка — гравець, який повернувся після довгої перерви, тому для таких є окрема категорія.','This is a probability based on public data, not proof: nobody can detect a smurf or a different owner with 100% certainty. Scores are the sum of signals (shown next to each). Only public matches count. The most common false alarm is a player returning after a long break, so they get their own category.','Это вероятность по открытым данным, а не доказательство: на 100% смурфа или чужой аккаунт не определит никто. Баллы — сумма сигналов (указаны возле каждого). Считаются только публичные матчи. Самая частая ошибка — игрок, вернувшийся после долгого перерыва, поэтому для таких есть отдельная категория.')}</div>`;
 
 /* інше */
 const RUNE=()=>L({0:'Подвійна шкода',1:'Прискорення',2:'Ілюзії',3:'Невидимість',4:'Регенерація',5:'Баунті',6:'Чародійство',7:'Вода',8:'Мудрість',9:'Щит'},{0:'Double Damage',1:'Haste',2:'Illusion',3:'Invisibility',4:'Regeneration',5:'Bounty',6:'Arcane',7:'Water',8:'Wisdom',9:'Shield'},{0:'Двойной урон',1:'Ускорение',2:'Иллюзии',3:'Невидимость',4:'Регенерация',5:'Баунти',6:'Чародейство',7:'Вода',8:'Мудрость',9:'Щит'});
