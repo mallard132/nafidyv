@@ -550,12 +550,12 @@ body.has-result .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
     <div class="tape" aria-hidden="true"><div id="tapeTxt"></div></div>
     <section id="dossier" class="dossier"></section>
     <div id="notice"></div>
-    <section class="box" id="epBox"></section>
     <section class="box" id="matchBox"></section>
     <section class="box" id="draftBox"></section>
     <section class="box" id="graphBox"></section>
-    <section class="box" id="chatBox"></section>
     <section class="box" id="teamsBox"></section>
+    <section class="box" id="chatBox"></section>
+    <section class="box" id="epBox"></section>
     <details class="how">
       <summary data-i="howT"></summary>
       <ul data-i="how"></ul>
@@ -1647,8 +1647,10 @@ function loadCW(){
   cwP=getJson(API+'/constants/chat_wheel',null,true).then(w=>{const o={};for(const k in w)o[k]=w[k].message||w[k].label||'';CW=o;store.set('nf_cw_v1',{t:Date.now(),w:o})}).finally(()=>{cwP=null});
   return cwP;
 }
+/* частина фраз у константах — сирі ключі локалізації (dota_chatwheel_message_MissingHero) */
+const cwText=k=>{const s=CW&&CW[k]||'',m=s.match(/^#?dota_chatwheel_(?:message|label)_(.+)$/i);return m?m[1].replace(/_/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2'):s};
 function msgHtml(e){
-  const p=e.p,txt=e.wheel?`<em>[${L('чат-колесо','chat wheel','чат-колесо')}]</em> ${esc(CW&&CW[e.text]||'')}`:esc(e.text);
+  const p=e.p,txt=e.wheel?`<em>[${L('чат-колесо','chat wheel','чат-колесо')}]</em> ${esc(cwText(e.text))}`:esc(e.text);
   return `<div class="msg${e.tox?' tox':''}"><span class="t">${mmss(e.t)}</span>${heroImg(p)?`<img src="${heroImg(p)}" alt="${esc(H(p))}">`:'<span></span>'}<span class="tx"><b style="color:${p.rad?'var(--rad)':'var(--dire)'}">${esc(pname(p))}</b>${txt}${e.tox?` <span class="flag bad">${L('токсик','toxic','токсик')}</span>`:''}${e.gg?` <span class="flag bad">${L('здався','gave up','сдался')}</span>`:''}</span></div>`;
 }
 function renderChat(){
