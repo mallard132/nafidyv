@@ -1076,7 +1076,7 @@ const DUMB_PTS={crit:25,imp:12,min:5};
 const DUMB_TIER=t=>({crit:L('критично','critical','критично'),imp:L('важливо','important','важно'),min:L('дрібниця','minor','мелочь')})[t];
 const BOOTS=/^(power_treads|phase_boots|arcane_boots|tranquil_boots|travel_boots(_2)?|guardian_greaves|boots_of_bearing)$/;
 const SIT_ITEMS=['spirit_vessel','lotus_orb','sphere','cyclone','wind_waker','manta','pipe','glimmer_cape','force_staff','ghost','aeon_disk','silver_edge','monkey_king_bar','nullifier','orchid','bloodthorn','heavens_halberd','shivas_guard','eternal_shroud','crimson_guard','solar_crest','disperser','black_king_bar'];
-const USE_SKIP=/^(power_treads|bfury|hand_of_midas|phase_boots|tranquil_boots|travel_boots(_2)?|magic_wand|bottle)$/;
+const USE_SKIP=/^(power_treads|bfury|hand_of_midas|phase_boots|tranquil_boots|travel_boots(_2)?|magic_wand|bottle|radiance|moon_shard|sphere|helm_of_the_dominator|helm_of_the_overlord)$/;
 const FEAT=()=>({dis3:L('ворогів зі станами (3+ героїв з контролем)','a stun-heavy line-up (3+ heroes with disables)','врагов со станами (3+ героя с контролем)'),sil:L('сайленсів у ворогів','enemy silences','сайленсов у врагов'),heal:L('ворожих хілерів (2+)','enemy healers (2+)','вражеских хилеров (2+)')});
 function dumbEval(p,c){
   const D={pts:0,F:[],whatIf:null};
