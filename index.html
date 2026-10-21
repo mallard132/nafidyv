@@ -708,7 +708,7 @@ const SIDE=k=>k==='r'?'Radiant':'Dire';
 let TB=null,tbP=null,UPG={};
 function loadTables(){
   if(TB)return Promise.resolve();
-  if(!tbP)tbP=fetch('tables.json').then(r=>r.ok?r.json():null).then(j=>{if(j&&j.farm)TB=j}).catch(()=>{}).finally(()=>{tbP=null});
+  if(!tbP)tbP=fetch('tables.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.farm)TB=j}).catch(()=>{}).finally(()=>{tbP=null});
   return tbP;
 }
 const BRN=['Herald–Guardian','Crusader–Archon','Legend–Ancient','Divine–Immortal'];
