@@ -1089,6 +1089,8 @@ const DUMB_PTS={crit:25,imp:12,min:5};
 const DUMB_TIER=t=>({crit:L('критично','critical','критично'),imp:L('важливо','important','важно'),min:L('дрібниця','minor','мелочь')})[t];
 const BOOTS=/^(power_treads|phase_boots|arcane_boots|tranquil_boots|travel_boots(_2)?|guardian_greaves|boots_of_bearing)$/;
 const SIT_ITEMS=['spirit_vessel','lotus_orb','sphere','cyclone','wind_waker','manta','pipe','glimmer_cape','force_staff','ghost','aeon_disk','silver_edge','monkey_king_bar','nullifier','orchid','bloodthorn','heavens_halberd','shivas_guard','eternal_shroud','crimson_guard','solar_crest','disperser','black_king_bar'];
+/* ситуаційний предмет рахується лише якщо він у меті саме цього героя: беруть ≥25% і з ним вінрейт на герої не нижчий */
+const META=25,inMeta=(T,k)=>{const r=T.find(x=>x[0]===k);return !!r&&r[1]>=META&&(r[3]==null||r[2]>=r[3])};
 const USE_SKIP=/^(power_treads|bfury|hand_of_midas|phase_boots|tranquil_boots|travel_boots(_2)?|magic_wand|bottle|radiance|moon_shard|sphere|helm_of_the_dominator|helm_of_the_overlord)$/;
 const FEAT=()=>({dis3:L('ворогів зі станами (3+ героїв з контролем)','a stun-heavy line-up (3+ heroes with disables)','врагов со станами (3+ героя с контролем)'),sil:L('сайленсів у ворогів','enemy silences','сайленсов у врагов'),heal:L('ворожих хілерів (2+)','enemy healers (2+)','вражеских хилеров (2+)')});
 function dumbEval(p,c){
@@ -1120,7 +1122,7 @@ function dumbEval(p,c){
   const disN=p.enemy.filter(e=>tags(e)[0]>0).length;
   const feats={dis3:disN>=3,sil:p.enemy.some(e=>tags(e)[1]),heal:p.enemy.filter(e=>tags(e)[2]).length>=2};
   const role=p.pos<=3?'c':'s',done=new Set(D.F.map(f=>f.k));
-  if(p.pos<=3&&min>=30&&disN>=3&&!covered('black_king_bar')&&!done.has('black_king_bar')&&share('black_king_bar')>=10&&spentAfter(20)>=8000){
+  if(p.pos<=3&&min>=30&&disN>=3&&!covered('black_king_bar')&&!done.has('black_king_bar')&&share('black_king_bar')>=META&&spentAfter(20)>=8000){
     const r=T.find(x=>x[0]==='black_king_bar'),d=r&&r[3]!=null?Math.min(15,r[2]-r[3]):5,tier=p.pos===1&&min>=35&&disN>=4?'crit':d>=10?'crit':'imp';
     done.add('black_king_bar');
     add(tier,'black_king_bar',L(`Без BKB проти ${disN} ворогів з контролем у ${mmss(c.dur)}-хвилинній грі, хоча після 20 хв витратив ${num(spentAfter(20))} золота. ${H(p)} на ${POS(p.pos)} беруть BKB у ${share('black_king_bar')}% ігор${r&&r[3]!=null?`, з ним вінрейт ${dec(r[2])}% проти ${dec(r[3])}%`:''}.`,
@@ -1130,7 +1132,7 @@ function dumbEval(p,c){
   if(min>=25)for(const f in feats){if(!feats[f])continue;
     const A=TB.sit[`${role}|${f}|1`]||{},B=TB.sit[`${role}|${f}|0`]||{};
     for(const k of SIT_ITEMS){
-      if(done.has(k)||!A[k]||!B[k]||covered(k)||share(k)<10)continue;
+      if(done.has(k)||!A[k]||!B[k]||covered(k)||!inMeta(T,k))continue;
       const it=ITEMK[k],d=+(A[k][0]-B[k][0]).toFixed(1);if(!it||d<3||spentAfter(15)<it.cost)continue;
       done.add(k);
       add(tierOf(d),k,L(`Проти ${FEAT()[f]} не взяв ${it.n}: у таких іграх цей предмет піднімає вінрейт на ${dec(d)} п.п. більше, ніж зазвичай (на ${num(A[k][1])} іграх). ${H(p)} купують його в ${share(k)}% ігор.`,
@@ -1459,14 +1461,14 @@ function dumbTabHtml(p){
   let any=false;
   for(const f of['dis3','sil','heal']){if(!on[f])continue;
     const A=TB.sit[`${role}|${f}|1`]||{},B=TB.sit[`${role}|${f}|0`]||{};
-    const li=SIT_ITEMS.filter(k=>A[k]&&B[k]&&ITEMK[k]).map(k=>({k,d:A[k][0]-B[k][0],n:A[k][1]})).filter(x=>x.d>=2).sort((a,b)=>b.d-a.d).slice(0,5);
+    const li=SIT_ITEMS.filter(k=>A[k]&&B[k]&&ITEMK[k]&&share(k)!=null).map(k=>({k,d:A[k][0]-B[k][0],n:A[k][1]})).filter(x=>x.d>=2).sort((a,b)=>b.d-a.d).slice(0,5);
     if(!li.length)continue;any=true;
     const hd=[L('Предмет','Item','Предмет'),L('Користь у таких іграх','Gain in such games','Польза в таких играх'),L('Беруть на герої','Hero pick rate','Берут на герое'),L('У тебе','You','У тебя')];
     h+=`<div class="sub-h">${L('Проти','Against','Против')} ${FEAT()[f]}: ${FL[f].map(e=>esc(H(e))).join(', ')}</div>
     <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${li.map(x=>{const it=ITEMK[x.k],g=via(x.k),s=share(x.k);
-      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">+${dec(x.d)} ${L('п.п.','pp','п.п.')} <span style="color:var(--muted)">(${num(x.n)})</span></td><td class="mono" data-l="${hd[2]}">${s!=null?s+'%':'—'}</td><td data-l="${hd[3]}">${g?`<span class="flag ok">${L('є','yes','есть')} · ${mmss(g.t)}</span>`:`<span class="flag ${s>=10&&min>=25?'bad':'info'}">${L('нема','no','нет')}</span>`}</td></tr>`}).join('')}</tbody></table></div>`;
+      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">+${dec(x.d)} ${L('п.п.','pp','п.п.')} <span style="color:var(--muted)">(${num(x.n)})</span></td><td class="mono" data-l="${hd[2]}">${s!=null?s+'%':'—'}</td><td data-l="${hd[3]}">${g?`<span class="flag ok">${L('є','yes','есть')} · ${mmss(g.t)}</span>`:(inMeta(T,x.k)&&min>=25?`<span class="flag bad">${L('нема','no','нет')}</span>`:`<span class="flag info">${L('нема · не мета','no · off-meta','нет · не мета')}</span>`)}</td></tr>`}).join('')}</tbody></table></div>`;
   }
-  h+=any?`<div class="note">${L('«Користь» — на скільки процентних пунктів предмет піднімає вінрейт у іграх проти таких ворогів більше, ніж у звичайних (у дужках — кількість ігор).','“Gain” = how many percentage points more the item adds to win rate against such enemies than usual (games in brackets).','«Польза» — на сколько процентных пунктов предмет поднимает винрейт в играх против таких врагов больше, чем в обычных (в скобках — количество игр).')}</div>`
+  h+=any?`<div class="note">${L('«Користь» — на скільки процентних пунктів предмет піднімає вінрейт у іграх проти таких ворогів більше, ніж у звичайних (у дужках — кількість ігор). Штраф лише за предмети з мети героя: їх беруть ≥25% гравців і вінрейт з ними не нижчий.','“Gain” = how many percentage points more the item adds to win rate against such enemies than usual (games in brackets). Penalties only for items in the hero’s meta: bought by ≥25% and not lowering the hero’s win rate.','«Польза» — на сколько процентных пунктов предмет поднимает винрейт в играх против таких врагов больше, чем в обычных (в скобках — количество игр). Штраф только за предметы из меты героя: их берут ≥25% игроков и винрейт с ними не ниже.')}</div>`
     :`<div class="empty">${L('Нічого особливого: у ворогів не було 3+ героїв з контролем, сайленсів чи 2+ хілерів.','Nothing special: the enemies had no 3+ disablers, silences or 2+ healers.','Ничего особенного: у врагов не было 3+ героев с контролем, сайленсов или 2+ хилеров.')}</div>`;
   /* 6. увесь матч */
   const R=S.P.map(q=>({q,pts:(q.D&&q.D.pts)||0,f:q.D&&q.D.F&&q.D.F[0]})).sort((a,b)=>b.pts-a.pts);
