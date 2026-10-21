@@ -160,6 +160,19 @@ h1 .q{color:var(--tape)}
 .bench-row .v{text-align:right;font:500 12px var(--f-mono);color:var(--muted)}
 .bench-row .v b{color:var(--text)}
 .note{font-size:12px;color:var(--muted);margin-top:12px;max-width:76ch}
+.bench-row .l img{width:22px;height:22px;object-fit:cover;border-radius:4px;vertical-align:-6px;margin-right:7px}
+.bench-row .l img.it{width:30px}
+.bench.wide{max-width:860px}
+.bench.wide .bench-row{grid-template-columns:minmax(0,300px) minmax(0,1fr) 110px}
+.bench-row .l .mono{white-space:nowrap}
+.bench-row .bar.none{background:none;border-top:1px dashed var(--line);height:0}
+.bench-row .bar.none::after{display:none}
+.more{display:inline-block;background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 14px;font:600 13px var(--f-body);margin-top:10px;min-height:38px;cursor:pointer}
+.more:hover{border-color:var(--tape)}
+.lnk{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.chips-s{display:flex;flex-wrap:wrap;gap:6px}
+.chips-s span{background:var(--ink);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--soft)}
+.dtable tr.me td{background:rgba(245,196,67,.07)}
 .tbl-wrap{overflow-x:auto}
 .dtable{width:100%;border-collapse:collapse;font-size:13px;min-width:430px}
 .dtable th{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
@@ -495,7 +508,7 @@ body.has-result .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
   .blame-bar button{min-width:38px;padding:0 5px;justify-content:center}
   .blame-bar button span{display:none}
   .blame-bar button img{width:30px;height:18px}
-  .bench-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l v" "b b";row-gap:5px}
+  .bench-row,.bench.wide .bench-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l v" "b b";row-gap:5px}
   .bench-row .l{grid-area:l}.bench-row .bar{grid-area:b}.bench-row .v{grid-area:v}
   .dtable{min-width:0}
   .dtable thead{display:none}
@@ -1300,18 +1313,21 @@ function renderDossier(){
   $('shImg').onclick=()=>shareCard().catch(()=>toast(L('Не вдалося створити картинку.','Couldn’t create the image.','Не удалось создать картинку.')));$('shLink').onclick=shareLink;
   $('dossier').querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>select(+b.dataset.sel));
   $('dossier').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;renderTab();b.scrollIntoView({block:'nearest',inline:'center'})});
+  bindGo($('dossier').querySelector('.dossier-main')||$('dossier'));
   renderTab();
 }
 
+/* кнопки «детальніше» → відкривають вкладку й прокручують до неї */
+function bindGo(root){root.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.go;renderTab();const tb=$('dossier').querySelector('.tabs');if(tb)tb.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'})})}
 function dumbHtml(p){
   const D=p.D;if(!D||!D.F.length)return '';
   return `<div class="sub-h">${DUMB(p)}-${L('бали','points','баллы')}: +${D.pts} ${L('до руїнометра','to the ruin meter','к руинометру')} <small style="color:var(--muted);font-weight:400">${L(`(без них ${p.ruin0})`,`(${p.ruin0} without them)`,`(без них ${p.ruin0})`)}</small></div>
   <ul class="facts">${D.F.map(f=>`<li class="bad"><span><b>+${f.pts} · ${DUMB_TIER(f.tier)}.</b> ${esc(f.t)}</span></li>`).join('')}${D.whatIf?`<li class="tip">${esc(whatIfTxt(D.whatIf))}</li>`:''}</ul>
-  <div class="note">${L('Приблизно: це статистика STRATZ по тисячах ігор на цьому герої, позиції й ранзі, а не аналіз конкретної ситуації.','Approximate: STRATZ stats over thousands of games on this hero, position and rank, not an analysis of this exact situation.','Примерно: это статистика STRATZ по тысячам игр на этом герое, позиции и ранге, а не анализ конкретной ситуации.')}</div>`;
+  <button type="button" class="more" data-go="dumb">${L('Білд і натискання детально →','Build & presses in detail →','Билд и нажатия подробно →')}</button>`;
 }
 
 /* ---------- вкладки досьє ---------- */
-const TABS=()=>[['asp',L('Аспекти','Aspects','Аспекты')],['deaths',L('Смерті','Deaths','Смерти')],['items',L('Предмети й скіли','Items & skills','Предметы и скиллы')],['gold',L('Золото й шкода','Gold & damage','Золото и урон')],['fights',L('Бійки','Fights','Драки')],['map',L('Карта','Map','Карта')],['profile',L('Профіль гравця','Player profile','Профиль игрока')],['misc',L('Інше','Other','Другое')]];
+const TABS=()=>[['asp',L('Аспекти','Aspects','Аспекты')],['dumb',L('Білд і натискання','Build & presses','Билд и нажатия')],['deaths',L('Смерті','Deaths','Смерти')],['items',L('Предмети й скіли','Items & skills','Предметы и скиллы')],['gold',L('Золото й шкода','Gold & damage','Золото и урон')],['fights',L('Бійки','Fights','Драки')],['map',L('Карта','Map','Карта')],['profile',L('Профіль гравця','Player profile','Профиль игрока')],['misc',L('Інше','Other','Другое')]];
 const MAPIMG='https://www.opendota.com/assets/images/dota2/map/detailed_740.webp';
 const loadingHtml=t=>`<div class="loading">${esc(t)}</div>`;
 const needParse=()=>`<div class="empty" style="padding-top:18px">${L('З’явиться після парсингу матчу (кнопка «Розпарсити на OpenDota» вище).','Available after the match is parsed (the “Parse on OpenDota” button above).','Появится после парсинга матча (кнопка «Распарсить на OpenDota» выше).')}</div>`;
@@ -1327,6 +1343,7 @@ function renderTab(){
     <div class="aspects">${ASPECTS().map(([k,n,d])=>aspectCard(p,k,n,d,!mob||k===wk)).join('')}</div>
     <div class="sec-h"><h3>${L(`Проти інших гравців на ${esc(H(p))}`,`Vs other ${esc(H(p))} players`,`Против других игроков на ${esc(H(p))}`)}</h3></div>${benchHtml(p)}`}
   else if(t==='deaths')h=`<div class="sec-h"><h3>${L('Кожна смерть','Every death','Каждая смерть')}</h3><small>${p.deaths} ${DEATHS(p.deaths)}</small></div>${deathsHtml(p)}`;
+  else if(t==='dumb')h=dumbTabHtml(p);
   else if(t==='items')h=itemsHtml(p);
   else if(t==='gold')h=goldHtml(p);
   else if(t==='fights')h=fightsHtml(p);
@@ -1334,6 +1351,8 @@ function renderTab(){
   else if(t==='profile')h=profileHtml(p);
   else h=miscHtml(p);
   el.innerHTML=h;
+  el.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>select(+b.dataset.sel));
+  bindGo(el);
   el.querySelectorAll('[data-mapt]').forEach(b=>b.onclick=()=>{S.mapT=b.dataset.mapt==='all'?'all':+b.dataset.mapt;renderTab()});
   el.querySelectorAll('[data-mapl]').forEach(b=>b.onclick=()=>{const k=b.dataset.mapl;S.mapL=Object.assign({heat:1,wards:1,deaths:1,route:1},S.mapL);S.mapL[k]=S.mapL[k]?0:1;renderTab()});
   el.querySelectorAll('[data-mapc]').forEach(b=>b.onclick=()=>{store.set('nf_mapc',b.dataset.mapc);renderTab()});
@@ -1342,14 +1361,16 @@ function renderTab(){
 }
 
 /* предмети й скіли */
-let ABIL=null,abilP=null;
+let ABIL=null,abilP=null,ABK=null;
+/* скіл за внутрішньою назвою (earthshaker_fissure → {n,img}) */
+const abByKey=k=>{if(!ABIL)return null;if(!ABK){ABK={};for(const id in ABIL)if(ABIL[id].k)ABK[ABIL[id].k]=ABIL[id]}return ABK[k]||null};
 function loadAbil(){
   if(ABIL)return Promise.resolve();
   if(abilP)return abilP;
-  const c=store.get('nf_abil_v2');if(c&&Date.now()-c.t<7*864e5){ABIL=c.a;return Promise.resolve()}
+  const c=store.get('nf_abil_v3');if(c&&Date.now()-c.t<7*864e5){ABIL=c.a;return Promise.resolve()}
   abilP=Promise.all([getJson(API+'/constants/ability_ids',null,true),getJson(API+'/constants/abilities',null,true)]).then(([ids,ab])=>{
-    const A={};for(const id in ids){const k=ids[id],a=ab[k];if(a)A[id]={n:String(a.dname||k).replace(/\{s:[^}]+\}/g,'X'),img:a.img||'',t:k.startsWith('special_bonus')?1:0}}
-    ABIL=A;store.set('nf_abil_v2',{t:Date.now(),a:A});
+    const A={};for(const id in ids){const k=ids[id],a=ab[k];if(a)A[id]={k,n:String(a.dname||k).replace(/\{s:[^}]+\}/g,'X'),img:a.img||'',t:k.startsWith('special_bonus')?1:0}}
+    ABIL=A;ABK=null;store.set('nf_abil_v3',{t:Date.now(),a:A});
   }).finally(()=>{abilP=null});
   return abilP;
 }
@@ -1368,21 +1389,91 @@ function itemsHtml(p){
   const buys=(p.purchase_log||[]).filter(e=>{const it=ITEMK[e.key];return it&&!/recipe/.test(e.key)&&((it.asm&&it.cost>=1000)||(/boots/.test(e.key)&&it.cost>=500))});
   h+=`<div class="sec-h"><h3>${L('Порядок предметів','Item order','Порядок предметов')}</h3><small>${L('тільки готові предмети від 1000 золота','completed items worth 1000+ only','только готовые предметы от 1000 золота')}</small></div>`;
   h+=buys.length?`<div class="itl">${buys.map(e=>`<div title="${esc(ITEMK[e.key].n)}"><img src="${STEAM+ITEMK[e.key].img}" alt="${esc(ITEMK[e.key].n)}" onerror="this.style.visibility='hidden'">${mmss(e.time)}</div>`).join('')}</div>`:noData();
-  const ti=TB&&p.br!=null&&TB.items[`${p.hero_id}_${p.pos}_${p.br}`];
-  if(ti&&ti.length){const got=new Set((p.purchase_log||[]).map(e=>e.key)),hd=[L('Предмет','Item','Предмет'),L('Беруть','Bought by','Берут'),L('Зазвичай','Usually','Обычно'),L('Вінрейт з / без','Win rate with / without','Винрейт с / без'),L('У тебе','You','У тебя')];
-    h+=`<div class="sec-h"><h3>${L(`Що збирають ${esc(H(p))} на ${POS(p.pos)} у ${BRN[p.br]}`,`What ${esc(H(p))} ${POS(p.pos)} players build in ${BRN[p.br]}`,`Что собирают ${esc(H(p))} на ${POS(p.pos)} в ${BRN[p.br]}`)}</h3><small>STRATZ · ${L('патч','patch','патч')} ${esc(TB.v)}</small></div>
-    <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${ti.filter(r=>ITEMK[r[0]]).map(([k,sh,wrB,wrN,med,n])=>{const it=ITEMK[k],own=got.has(k)||(UPG[k]||[]).some(u=>got.has(u));
-      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">${sh}%</td><td class="mono" data-l="${hd[2]}">~${med} ${L('хв','min','мин')}</td><td class="mono" data-l="${hd[3]}">${dec(wrB)}% / ${wrN!=null?dec(wrN)+'%':'—'}</td><td data-l="${hd[4]}">${own?`<span class="flag ok">${L('є','yes','есть')}</span>`:`<span class="flag info">${L('нема','no','нет')}</span>`}</td></tr>`}).join('')}</tbody></table></div>
-    <div class="note">${L(`На ${num(ti[0][5])}+ іграх. Вінрейт «з» вищий ще й тому, що предмет встигають купити в іграх, які йдуть добре, тож це підказка, а не закон.`,`Based on ${num(ti[0][5])}+ games. The “with” win rate is also higher because items get bought in games that go well, so treat it as a hint, not a law.`,`На ${num(ti[0][5])}+ играх. Винрейт «с» выше ещё и потому, что предмет успевают купить в играх, которые идут хорошо, так что это подсказка, а не закон.`)}</div>`}
-  const its=p.X.items;
-  h+=`<div class="sec-h"><h3>${L('Як використовував активні предмети','Active item usage','Как использовал активные предметы')}</h3></div>`;
-  if(its.length){const hd=[L('Предмет','Item','Предмет'),L('Куплено','Bought','Куплен'),L('Натискань','Uses','Нажатий'),L('Висновок','Verdict','Вывод')];
-    h+=`<div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${its.map(i=>{const per=i.own>=1?i.u/(i.own/10):null;
-      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+ITEMK[i.key].img}" alt="">${esc(i.n)}</td><td class="mono" data-l="${hd[1]}">${mmss(i.t)}</td><td class="mono" data-l="${hd[2]}">${i.u}${per!=null?` <span style="color:var(--muted)">(${dec(per)} / 10 ${L('хв','min','мин')})</span>`:''}</td><td>${i.bad?`<span class="flag bad">${i.u?L('рідко','too rarely','редко'):L('не використав','never used','не использовал')}</span>`:`<span class="flag ok">${L('ок','ok','ок')}</span>`}</td></tr>`}).join('')}</tbody></table></div>`;
-    const bad=its.filter(i=>i.bad);if(bad.length)h+=`<ul class="facts" style="margin-top:12px">${bad.map(i=>`<li class="bad">${esc(i.badText)}</li>`).join('')}</ul>`;
-  }else h+=`<div class="empty">${L('Активних предметів не купував.','Bought no active items.','Активных предметов не покупал.')}</div>`;
+  h+=`<div class="note">${L('Порівняння з нормами (білд, натискання предметів і скілів) — у вкладці «Білд і натискання».','Comparison with norms (build, item and skill presses) is in the “Build & presses” tab.','Сравнение с нормами (билд, нажатия предметов и скиллов) — во вкладке «Билд и нажатия».')} <button type="button" class="lnk" data-go="dumb">${L('Відкрити →','Open →','Открыть →')}</button></div>`;
   const nh=p.neutral_item_history||[];
   if(nh.length){h+=`<div class="sec-h"><h3>${L('Нейтральні предмети','Neutral items','Нейтральные предметы')}</h3></div><div class="itl">${nh.map(n=>{const it=ITEMK[n.item_neutral],en=n.item_neutral_enhancement&&ITEMK[n.item_neutral_enhancement];return it?`<div title="${esc(it.n+(en?' + '+en.n:''))}"><img src="${STEAM+it.img}" alt="${esc(it.n)}" onerror="this.style.visibility='hidden'">${mmss(n.time)}</div>`:''}).join('')}</div>`}
+  return h;
+}
+
+/* ---------- вкладка «Білд і натискання»: предмети й скіли гравця проти норм STRATZ ---------- */
+const SHOW_SKIP=/^(power_treads|bfury|radiance|moon_shard|sphere|tranquil_boots|bottle|helm_of_the_dominator|helm_of_the_overlord)$/;
+const rateRow=(img,cls,name,sub,w,c,right)=>`<div class="bench-row c${c}"><span class="l">${img?`<img class="${cls}" src="${img}" alt="" onerror="this.style.visibility='hidden'">`:''}${esc(name)}${sub?` <span class="mono">${sub}</span>`:''}</span>${w==null?'<span class="bar none"></span>':`<span class="bar"><i style="--w:${Math.max(2,Math.min(100,w)).toFixed(0)}%"></i></span>`}<span class="v">${right}</span></div>`;
+const cutTxt=(t,n)=>t.length>n?t.slice(0,n-1).replace(/\s+\S*$/,'')+'…':t;
+function dumbTabHtml(p){
+  if(!S.parsed)return needParse();
+  if(!TB)return `<div class="empty">${L('Таблиці норм не завантажились — онови сторінку.','Norm tables failed to load — refresh the page.','Таблицы норм не загрузились — обнови страницу.')}</div>`;
+  if(!ABIL)loadAbil().then(()=>{if(S&&S.tab==='dumb')renderTab()}).catch(()=>{});
+  const min=S.dur/60,D=p.D||{pts:0,F:[]},M=L('хв','min','мин');
+  let h='';
+  /* 1. підсумок */
+  h+=`<div class="sec-h"><h3>${DUMB(p)}-${L('бали','points','баллы')} · ${esc(H(p))}</h3>${D.pts?`<small>${L(`+${D.pts} до руїнометра (без них ${p.ruin0})`,`+${D.pts} to the ruin meter (${p.ruin0} without them)`,`+${D.pts} к руинометру (без них ${p.ruin0})`)}</small>`:''}</div>`;
+  if(p.leaver)h+=`<div class="empty">${L('Гравець покинув гру — бали не рахуються.','The player abandoned — no points counted.','Игрок покинул игру — баллы не считаются.')}</div>`;
+  else if(p.br==null)h+=`<div class="empty">${L('Ранг невідомий (медаль прихована, середнього рангу лобі теж нема), тому бали не рахуються. Натискання нижче все одно порівняні з нормою героя.','Rank unknown (hidden medal, no lobby average), so no points. Presses below are still compared with the hero norm.','Ранг неизвестен (медаль скрыта, среднего ранга лобби тоже нет), поэтому баллы не считаются. Нажатия ниже всё равно сравнены с нормой героя.')}</div>`;
+  else h+=D.F.length?`<ul class="facts">${D.F.map(f=>`<li class="bad"><span><b>+${f.pts} · ${DUMB_TIER(f.tier)}.</b> ${esc(f.t)}</span></li>`).join('')}${D.whatIf?`<li class="tip">${esc(whatIfTxt(D.whatIf))}</li>`:''}</ul>`
+    :`<ul class="facts"><li class="good">${L('Жодного штрафу: ключові предмети є, скіли й предмети натискались не гірше за інших.','No penalties: key items built, skills and items pressed as often as others.','Ни одного штрафа: ключевые предметы есть, скиллы и предметы нажимались не хуже других.')}</li></ul>`;
+  /* 2. скіли */
+  const SK=(TB.skill&&TB.skill[p.hero_id])||{},au=p.ability_uses||{},di=p.damage_inflictor||{};
+  const ups=Array.isArray(p.ability_upgrades_arr)&&p.ability_upgrades_arr.length?new Set(p.ability_upgrades_arr.map(id=>TB.abId[id]||(ABIL&&ABIL[id]&&ABIL[id].k)).filter(Boolean)):null;
+  const abN=a=>(TB.abN&&TB.abN[a])||(abByKey(a)||{}).n||a,abI=a=>{const x=abByKey(a);return x&&x.img?STEAM+x.img:''};
+  h+=`<div class="sec-h"><h3>${L('Скіли: скільки натискав','Skills: how often cast','Скиллы: сколько нажимал')}</h3><small>${L('праворуч — на 10 хв: твої / середній гравець','right: per 10 min — yours / average player','справа — на 10 мин: твои / средний игрок')}</small></div>`;
+  const sk=Object.keys(SK);
+  if(sk.length){
+    h+=`<div class="bench wide">`;
+    for(const a of sk){const [p20,p50,dmed]=SK[a],u=au[a]||0,rate=u/min;
+      if(ups&&!ups.has(a)){h+=rateRow(abI(a),'',abN(a),'',null,'',L('не вивчав','not learned','не изучал'));continue}
+      h+=rateRow(abI(a),'',abN(a),`${u}×`,p50?rate/p50*50:50,rate<p20*.5?3:rate<p20?2:rate<p50?1:0,`<b>${dec(rate*10)}</b> / ${dec(p50*10)}`);
+      if(dmed&&u&&di[a]!=null){const per=di[a]/u;
+        h+=rateRow('','',`↳ ${L('шкода за натискання','damage per cast','урон за нажатие')}`,'',per/dmed*50,per<dmed*.4?3:per<dmed*.7?2:per<dmed?1:0,`<b>${num(per)}</b> / ${num(dmed)}`)}
+    }
+    h+=`</div><div class="note">${L(`Норма — справжні натискання з ${num(SK[sk[0]][3])}+ ігор на ${esc(H(p))} (STRATZ, патч ${esc(TB.v)}). Риска посередині — середній гравець; червоне — менше, ніж у 80% гравців.`,`Norm = real casts from ${num(SK[sk[0]][3])}+ ${esc(H(p))} games (STRATZ, patch ${esc(TB.v)}). The tick in the middle is an average player; red = fewer than 80% of players.`,`Норма — настоящие нажатия из ${num(SK[sk[0]][3])}+ игр на ${esc(H(p))} (STRATZ, патч ${esc(TB.v)}). Риска посередине — средний игрок; красное — меньше, чем у 80% игроков.`)}</div>`;
+  }else h+=`<div class="empty">${L('Для цього героя ще нема норм скілів — мало ігор у вибірці.','No skill norms for this hero yet — too few games in the sample.','Для этого героя ещё нет норм скиллов — мало игр в выборке.')}</div>`;
+  const other=Object.keys(au).filter(a=>!SK[a]&&au[a]>0&&!/^(special_bonus|item_|plus_)/.test(a)).sort((x,y)=>au[y]-au[x]);
+  if(other.length)h+=`<div class="sub-h">${L('Інші скіли (без норми)','Other skills (no norm)','Другие скиллы (без нормы)')}</div><div class="chips-s">${other.map(a=>`<span>${esc(abN(a))} <b class="mono">${au[a]}×</b></span>`).join('')}</div>`;
+  /* 3. активні предмети */
+  const first={};for(const e of p.purchase_log||[])if(first[e.key]==null&&ITEMK[e.key])first[e.key]=e.time;
+  const iu=p.item_uses||{};
+  const act=Object.keys(first).filter(k=>!SHOW_SKIP.test(k)&&(TB.use[k]||KEY_ITEMS.includes(k))).map(k=>({k,t:first[k],own:Math.max(0,(S.dur-Math.max(0,first[k]))/60),u:iu[k]||0,U:TB.use[k]})).filter(x=>x.own>=3).sort((a,b)=>a.t-b.t);
+  h+=`<div class="sec-h"><h3>${L('Активні предмети: скільки натискав','Active items: how often used','Активные предметы: сколько нажимал')}</h3><small>${L('праворуч — на 10 хв з предметом: твої / середній гравець','right: per 10 min owned — yours / average player','справа — на 10 мин с предметом: твои / средний игрок')}</small></div>`;
+  if(act.length){
+    h+=`<div class="bench wide">${act.map(x=>{const it=ITEMK[x.k],per=x.u/x.own,sub=`${x.u}× · ${L('з','from','с')} ${mmss(x.t)}`;
+      if(x.U&&x.U[2]>=.05){const r=per/x.U[2];return rateRow(STEAM+it.img,'it',it.n,sub,r*50,r<.2?3:r<.45?2:r<1?1:0,`<b>${dec(per*10)}</b> / ${dec(x.U[2]*10)}`)}
+      return rateRow(STEAM+it.img,'it',it.n,sub,null,!x.u&&x.own>=6?3:'',`<b>${dec(per*10)}</b> / —`)}).join('')}</div>
+    <div class="note">${L('Перемикачі (Radiance, Power Treads) і предмети, які натискають раз на гру (Moon Shard, Dominator, Linken’s), не оцінюються.','Toggles (Radiance, Power Treads) and once-a-game items (Moon Shard, Dominator, Linken’s) are not rated.','Переключатели (Radiance, Power Treads) и предметы, которые нажимают раз за игру (Moon Shard, Dominator, Linken’s), не оцениваются.')}</div>`;
+  }else h+=`<div class="empty">${L('Активних предметів не купував.','Bought no active items.','Активных предметов не покупал.')}</div>`;
+  /* 4. білд проти норми */
+  const T=p.br!=null?TB.items[`${p.hero_id}_${p.pos}_${p.br}`]||[]:[];
+  const via=k=>{if(first[k]!=null)return{k,t:first[k]};for(const u of UPG[k]||[])if(first[u]!=null)return{k:u,t:first[u]};if(BOOTS.test(k))for(const b in first)if(BOOTS.test(b))return{k:b,t:first[b]};return null};
+  h+=`<div class="sec-h"><h3>${p.br!=null?L(`Білд проти норми: ${esc(H(p))}, ${POS(p.pos)}, ${BRN[p.br]}`,`Build vs norm: ${esc(H(p))}, ${POS(p.pos)}, ${BRN[p.br]}`,`Билд против нормы: ${esc(H(p))}, ${POS(p.pos)}, ${BRN[p.br]}`):L('Білд проти норми','Build vs norm','Билд против нормы')}</h3><small>STRATZ · ${L('патч','patch','патч')} ${esc(TB.v)}</small></div>`;
+  const rows=T.filter(r=>ITEMK[r[0]]&&r[1]>=20).sort((a,b)=>a[4]-b[4]).slice(0,14);
+  if(rows.length){const hd=[L('Предмет','Item','Предмет'),L('Беруть','Bought by','Берут'),L('Зазвичай','Usually','Обычно'),L('У тебе','You','У тебя'),L('Вінрейт з / без','Win rate with / without','Винрейт с / без')];
+    h+=`<div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,sh,wrB,wrN,med])=>{const it=ITEMK[k],g=via(k);let f;
+      if(!g)f=min>=med+8?`<span class="flag bad">${L('не зібрав','missing','не собрал')}</span>`:`<span class="flag info">${L('не встиг','no time','не успел')}</span>`;
+      else{const late=Math.round(g.t/60-med);f=`${mmss(g.t)} `+(late>=6?`<span class="flag bad">+${late} ${M}</span>`:late<=-3?`<span class="flag ok">−${-late} ${M}</span>`:`<span class="flag ok">${L('вчасно','on time','вовремя')}</span>`)+(g.k!==k&&ITEMK[g.k]?` <small style="color:var(--muted)">(${esc(ITEMK[g.k].n)})</small>`:'')}
+      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">${sh}%</td><td class="mono" data-l="${hd[2]}">~${med} ${M}</td><td class="mono" data-l="${hd[3]}">${f}</td><td class="mono" data-l="${hd[4]}">${dec(wrB)}% / ${wrN!=null?dec(wrN)+'%':'—'}</td></tr>`}).join('')}</tbody></table></div>
+    <div class="note">${L('«Зазвичай» — медіанна хвилина покупки. Вінрейт «з» вищий ще й тому, що предмет встигають купити в іграх, які йдуть добре, тож це підказка, а не закон.','“Usually” = median purchase minute. The “with” win rate is also higher because items get bought in games that go well, so treat it as a hint, not a law.','«Обычно» — медианная минута покупки. Винрейт «с» выше ещё и потому, что предмет успевают купить в играх, которые идут хорошо, так что это подсказка, а не закон.')}</div>`;
+  }else h+=`<div class="empty">${p.br==null?L('Ранг невідомий — нема з чим порівняти.','Rank unknown — nothing to compare with.','Ранг неизвестен — не с чем сравнить.'):L('Для цього героя на цій позиції й ранзі мало ігор у вибірці.','Too few games for this hero, position and rank in the sample.','Для этого героя на этой позиции и ранге мало игр в выборке.')}</div>`;
+  /* 5. ситуаційні предмети проти цих ворогів */
+  const tg=e=>TB.tags[e.hero_id]||[0,0,0],E=p.enemy||[],FL={dis3:E.filter(e=>tg(e)[0]>0),sil:E.filter(e=>tg(e)[1]),heal:E.filter(e=>tg(e)[2])};
+  const on={dis3:FL.dis3.length>=3,sil:FL.sil.length>0,heal:FL.heal.length>=2},role=p.pos<=3?'c':'s',share=k=>{const r=T.find(x=>x[0]===k);return r?r[1]:null};
+  h+=`<div class="sec-h"><h3>${L('Ситуаційні предмети проти цих ворогів','Situational items vs these enemies','Ситуативные предметы против этих врагов')}</h3></div>`;
+  let any=false;
+  for(const f of['dis3','sil','heal']){if(!on[f])continue;
+    const A=TB.sit[`${role}|${f}|1`]||{},B=TB.sit[`${role}|${f}|0`]||{};
+    const li=SIT_ITEMS.filter(k=>A[k]&&B[k]&&ITEMK[k]).map(k=>({k,d:A[k][0]-B[k][0],n:A[k][1]})).filter(x=>x.d>=2).sort((a,b)=>b.d-a.d).slice(0,5);
+    if(!li.length)continue;any=true;
+    const hd=[L('Предмет','Item','Предмет'),L('Користь у таких іграх','Gain in such games','Польза в таких играх'),L('Беруть на герої','Hero pick rate','Берут на герое'),L('У тебе','You','У тебя')];
+    h+=`<div class="sub-h">${L('Проти','Against','Против')} ${FEAT()[f]}: ${FL[f].map(e=>esc(H(e))).join(', ')}</div>
+    <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${li.map(x=>{const it=ITEMK[x.k],g=via(x.k),s=share(x.k);
+      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">+${dec(x.d)} ${L('п.п.','pp','п.п.')} <span style="color:var(--muted)">(${num(x.n)})</span></td><td class="mono" data-l="${hd[2]}">${s!=null?s+'%':'—'}</td><td data-l="${hd[3]}">${g?`<span class="flag ok">${L('є','yes','есть')} · ${mmss(g.t)}</span>`:`<span class="flag ${s>=10&&min>=25?'bad':'info'}">${L('нема','no','нет')}</span>`}</td></tr>`}).join('')}</tbody></table></div>`;
+  }
+  h+=any?`<div class="note">${L('«Користь» — на скільки процентних пунктів предмет піднімає вінрейт у іграх проти таких ворогів більше, ніж у звичайних (у дужках — кількість ігор).','“Gain” = how many percentage points more the item adds to win rate against such enemies than usual (games in brackets).','«Польза» — на сколько процентных пунктов предмет поднимает винрейт в играх против таких врагов больше, чем в обычных (в скобках — количество игр).')}</div>`
+    :`<div class="empty">${L('Нічого особливого: у ворогів не було 3+ героїв з контролем, сайленсів чи 2+ хілерів.','Nothing special: the enemies had no 3+ disablers, silences or 2+ healers.','Ничего особенного: у врагов не было 3+ героев с контролем, сайленсов или 2+ хилеров.')}</div>`;
+  /* 6. увесь матч */
+  const R=S.P.map(q=>({q,pts:(q.D&&q.D.pts)||0,f:q.D&&q.D.F&&q.D.F[0]})).sort((a,b)=>b.pts-a.pts);
+  const hd=[L('Гравець','Player','Игрок'),L('Бали','Points','Баллы'),L('Найбільша помилка','Biggest mistake','Самая большая ошибка')];
+  h+=`<div class="sec-h"><h3>${L('Бали всього матчу','Points for the whole match','Баллы всего матча')}</h3><small>${L('натисни на героя, щоб відкрити його','tap a hero to open them','нажми на героя, чтобы открыть его')}</small></div>
+  <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${R.map(x=>`<tr${x.q===p?' class="me"':''}><td class="k" data-l="${hd[0]}">${heroImg(x.q)?`<img src="${heroImg(x.q)}" alt="">`:''}<button type="button" class="lnk" data-sel="${x.q.i}">${esc(H(x.q))}</button> <span style="color:${x.q.rad?'var(--rad)':'var(--dire)'}">●</span></td><td class="mono" data-l="${hd[1]}">${x.pts?`<b class="c3">+${x.pts}</b>`:'0'}</td><td data-l="${hd[2]}">${x.f?esc(cutTxt(x.f.t,110)):'—'}</td></tr>`).join('')}</tbody></table></div>
+  <div class="note">${L('Приблизно: це статистика STRATZ по тисячах ігор на цьому герої, позиції й ранзі, а не аналіз конкретної ситуації.','Approximate: STRATZ stats over thousands of games on this hero, position and rank, not an analysis of this exact situation.','Примерно: это статистика STRATZ по тысячам игр на этом герое, позиции и ранге, а не анализ конкретной ситуации.')}</div>`;
   return h;
 }
 
