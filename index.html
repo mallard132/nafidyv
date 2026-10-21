@@ -605,6 +605,8 @@ const STATIC={
 <li><b>Рішення.</b> Байбеки в таверну, дисконекти, кількість TP, невитрачене золото в програній грі, лів.</li>
 <li><b>Ваги перевірені на реальних матчах.</b> Для кожної позиції ваги підібрано статистично (логістична регресія) на 270 розпарсених матчах OpenDota — 2700 гравців — і змішано навпіл з логікою позицій. «Будівлі й Рошан» мають фіксовані 8%: вежі зносять тому, що виграють, а не навпаки. Жоден аспект не важить понад 35%. Перевірка на окремій половині матчів: команда з нижчим середнім руїнометром виграла у 96,7% випадків. Позицію бере OpenDota, а якщо її немає — визначаємо за лінією та статками.</li>
 <li><b>Руїнометр = 100 − зважений бал.</b> До 38 — тащив, 38–51 — норм, 52–61 — під питанням, від 62 — слив. Хто покинув гру, одразу отримує 100.</li>
+<li><b>Дурак-бали (нове у v4).</b> Окремо від аспектів додаються до руїнометра за предмети: не зібрав те, що беруть 40%+ гравців на цьому герої, позиції й ранзі (а золото було); без BKB проти 3+ героїв з контролем; не взяв ситуаційний предмет проти станів, сайленсів чи хілу; тиснув предмет у рази рідше за норму. Критично +25, важливо +12, дрібниця +5, без стелі. Для друзів зі списку акаунтів це «дурак», для решти — «еблан».</li>
+<li><b>Фарм за рангом.</b> GPM, XPM і добивання порівнюються з гравцями тієї ж позиції й рангу (Herald–Guardian, Crusader–Archon, Legend–Ancient, Divine–Immortal) з поправкою на героя. Ранг — медаль гравця, а якщо її не видно — середня медаль лобі. Норми порахував Claude зі статистики STRATZ.</li>
 <li>Порівняння з іншими гравцями на герої — це перцентилі OpenDota. Без розпарсеного запису матчу лінія, деталі смертей, вижен і рішення недоступні.</li>
 <li>Це оцінка за статистикою, а не вирок: смерть «за просто так» могла бути жертвою заради команди.</li>`,
 `<li>Every player is rated on 7 aspects. Each aspect is a score from 0 to 100 where <b>50 is normal</b>, lower is worse, higher is better.</li>
@@ -617,6 +619,8 @@ const STATIC={
 <li><b>Decisions.</b> Wasted buybacks, disconnects, TP usage, unspent gold in a lost game, abandons.</li>
 <li><b>Weights are checked on real matches.</b> For each position the weights were fitted statistically (logistic regression) on 270 parsed OpenDota matches — 2,700 players — and blended 50/50 with position logic. “Buildings &amp; Roshan” is fixed at 8%: towers fall because a team wins, not the other way round. No aspect weighs more than 35%. Checked on a held-out half of the matches: the team with the lower average ruin meter won 96.7% of the time. Positions come from OpenDota; if missing, they are estimated from lane and net worth.</li>
 <li><b>Ruin meter = 100 − weighted score.</b> Under 38: carried, 38–51: fine, 52–61: questionable, 62+: ruined. An abandon scores 100 right away.</li>
+<li><b>Fool points (new in v4).</b> Added to the ruin meter on top of the aspects, for items: skipped an item that 40%+ of players on this hero, position and rank build (while having the gold); no BKB against 3+ heroes with disables; skipped a situational item against stuns, silences or healing; used an item far less often than normal. Critical +25, important +12, minor +5, no cap. Friends from the account list are “fools”, everyone else is an “idiot”.</li>
+<li><b>Farm by rank.</b> GPM, XPM and last hits are compared with players of the same position and rank (Herald–Guardian, Crusader–Archon, Legend–Ancient, Divine–Immortal), adjusted for the hero. Rank is the player’s medal, or the lobby average if hidden. Norms were computed by Claude from STRATZ stats.</li>
 <li>Hero comparisons are OpenDota percentiles. Without a parsed replay, lane, death details, vision and decisions are unavailable.</li>
 <li>This is a stats-based estimate, not a verdict: a "free" death may have been a sacrifice for the team.</li>`,
 `<li>Каждого игрока оцениваем по 7 аспектам. Каждый аспект — балл от 0 до 100, где <b>50 — норма</b>, меньше — хуже, больше — лучше.</li>
@@ -629,9 +633,11 @@ const STATIC={
 <li><b>Решения.</b> Байбеки в таверну, дисконнекты, количество ТП, непотраченное золото в проигранной игре, лив.</li>
 <li><b>Веса проверены на реальных матчах.</b> Для каждой позиции веса подобраны статистически (логистическая регрессия) на 270 распарсенных матчах OpenDota — 2700 игроков — и смешаны пополам с логикой позиций. «Строения и Рошан» имеют фиксированные 8%: башни сносят потому, что выигрывают, а не наоборот. Ни один аспект не весит больше 35%. Проверка на отдельной половине матчей: команда с более низким средним руинометром выиграла в 96,7% случаев. Позицию берёт OpenDota, а если её нет — определяем по линии и богатству.</li>
 <li><b>Руинометр = 100 − взвешенный балл.</b> До 38 — тащил, 38–51 — норм, 52–61 — под вопросом, от 62 — слил. Ливер сразу получает 100.</li>
+<li><b>Дурак-баллы (новое в v4).</b> Отдельно от аспектов добавляются к руинометру за предметы: не собрал то, что берут 40%+ игроков на этом герое, позиции и ранге (а золото было); без BKB против 3+ героев с контролем; не взял ситуативный предмет против станов, сайленсов или хила; нажимал предмет в разы реже нормы. Критично +25, важно +12, мелочь +5, без потолка. Для друзей из списка аккаунтов это «дурак», для остальных — «еблан».</li>
+<li><b>Фарм по рангу.</b> GPM, XPM и добивания сравниваются с игроками той же позиции и ранга (Herald–Guardian, Crusader–Archon, Legend–Ancient, Divine–Immortal) с поправкой на героя. Ранг — медаль игрока, а если её не видно — средняя медаль лобби. Нормы посчитал Claude по статистике STRATZ.</li>
 <li>Сравнение с другими игроками на герое — это перцентили OpenDota. Без распарсенной записи матча линия, детали смертей, вижн и решения недоступны.</li>
 <li>Это оценка по статистике, а не приговор: смерть «просто так» могла быть жертвой ради команды.</li>`],
-  footer:['Дані: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>. Картинки героїв і предметів — Valve.','Data: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>. Hero and item images © Valve.','Данные: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>. Картинки героев и предметов — Valve.']
+  footer:['Дані: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>, норми — <a href="https://stratz.com" target="_blank" rel="noopener">STRATZ</a>. Картинки героїв і предметів — Valve.','Data: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>, norms from <a href="https://stratz.com" target="_blank" rel="noopener">STRATZ</a>. Hero and item images © Valve.','Данные: <a href="https://www.opendota.com" target="_blank" rel="noopener">OpenDota API</a>, нормы — <a href="https://stratz.com" target="_blank" rel="noopener">STRATZ</a>. Картинки героев и предметов — Valve.']
 };
 const ST=k=>STATIC[k][LANG==='en'?1:LANG==='ru'?2:0];
 function applyStatic(){
@@ -698,6 +704,37 @@ const BENCH=()=>[['gold_per_min',L('Золото за хв','Gold per min','Зо
 const RUIN=()=>L('Руїнометр','Ruin meter','Руинометр');
 const SIDE=k=>k==='r'?'Radiant':'Dire';
 
+/* ---------- v4: норми за героєм + позицією + рангом (STRATZ, рахуються офлайн, лежать поруч у tables.json) ---------- */
+let TB=null,tbP=null,UPG={};
+function loadTables(){
+  if(TB)return Promise.resolve();
+  if(!tbP)tbP=fetch('tables.json').then(r=>r.ok?r.json():null).then(j=>{if(j&&j.farm)TB=j}).catch(()=>{}).finally(()=>{tbP=null});
+  return tbP;
+}
+const BRN=['Herald–Guardian','Crusader–Archon','Legend–Ancient','Divine–Immortal'];
+const brOfTier=t=>t?Math.min(3,Math.max(0,Math.floor((Math.floor(t/10)-1)/2))):null;
+/* ранг гравця: власна медаль, а якщо прихована — середня медаль лобі */
+function brOf(p,c){
+  const own=brOfTier(p.rank_tier);if(own!=null)return own;
+  if(c.lobbyBr===undefined){const r=c.P.map(x=>x.rank_tier).filter(Boolean);c.lobbyBr=r.length?brOfTier(Math.round(avg(r.map(t=>Math.floor(t/10))))*10+1):brOfTier(c.m.average_rank)}
+  return c.lobbyBr;
+}
+/* перцентиль фарму серед гравців тієї ж позиції й рангу з поправкою на героя (0..1) */
+function fpct(p,c,k){
+  if(!TB||p.br==null)return null;
+  const F=TB.farm[p.pos+'_'+p.br];if(!F||!F[k])return null;
+  const h=TB.hf[`${p.hero_id}_${p.pos}_${p.br}`],f=h?h[k==='g'?0:k==='x'?1:2]:1;
+  const raw=k==='g'?p.gold_per_min:k==='x'?p.xp_per_min:(p.last_hits||0)/(c.dur/60);if(raw==null)return null;
+  const v=raw/f,q=F[k];
+  if(v<=q[0])return 0;if(v>=q[20])return 1;
+  for(let i=0;i<20;i++)if(v<=q[i+1])return (i+(v-q[i])/((q[i+1]-q[i])||1))/20;
+  return 1;
+}
+function vsPos(pc,p){
+  const hi=pc>=.5,x=Math.round((hi?pc:1-pc)*100),w=hi?L('краще','better','лучше'):L('гірше','worse','хуже');
+  return L(`${w}, ніж у ${x}% ${POS(p.pos)} у ${BRN[p.br]} (з поправкою на ${H(p)})`,`${w} than ${x}% of ${BRN[p.br]} ${POS(p.pos)} players (adjusted for ${H(p)})`,`${w}, чем у ${x}% ${POS(p.pos)} в ${BRN[p.br]} (с поправкой на ${H(p)})`);
+}
+
 async function getJson(url,opt,generic){
   let r;
   try{r=await fetch(url,opt||undefined)}catch(e){throw new Error(L('Не вдалося зв’язатися з OpenDota. Перевір інтернет і спробуй ще раз.','Couldn’t reach OpenDota. Check your connection and try again.','Не удалось связаться с OpenDota. Проверь интернет и попробуй ещё раз.'))}
@@ -710,16 +747,22 @@ async function getJson(url,opt,generic){
 
 async function loadConst(){
   if(HEROES&&Object.keys(ITEMK).length)return;
-  const c=store.get('nf_const_v3');
+  const c=store.get('nf_const_v4');
   if(c&&Date.now()-c.t<3*864e5){HEROES=c.h;ITEMS=c.i}
   else{
     const [h,it]=await Promise.all([getJson(API+'/constants/heroes'),getJson(API+'/constants/items')]);
     HEROES={};for(const k in h){const x=h[k];HEROES[x.id]={n:x.localized_name,img:x.img,key:x.name}}
-    ITEMS={};for(const k in it){const x=it[k];if(x&&x.id!=null)ITEMS[x.id]={n:x.dname||k,img:x.img,cost:x.cost||0,k,asm:!!(x.components&&x.components.length)}}
-    store.set('nf_const_v3',{t:Date.now(),h:HEROES,i:ITEMS});
+    ITEMS={};for(const k in it){const x=it[k];if(x&&x.id!=null)ITEMS[x.id]={n:x.dname||k,img:x.img,cost:x.cost||0,k,asm:!!(x.components&&x.components.length),comp:x.components||null}}
+    store.set('nf_const_v4',{t:Date.now(),h:HEROES,i:ITEMS});
   }
+  indexConst();
+}
+function indexConst(){
   HERO_BY_KEY={};for(const id in HEROES)HERO_BY_KEY[HEROES[id].key]=HEROES[id];
   ITEMK={};for(const id in ITEMS)ITEMK[ITEMS[id].k]=ITEMS[id];
+  /* UPG[k] — предмети, у які k входить як частина (щоб не карати за «не купив Perseverance», коли зібрав Battle Fury) */
+  UPG={};const expand=(k,seen)=>{for(const c of(ITEMK[k]&&ITEMK[k].comp)||[]){if(seen.has(c))continue;seen.add(c);expand(c,seen)}return seen};
+  for(const k in ITEMK)for(const c of expand(k,new Set()))(UPG[c]=UPG[c]||[]).push(k);
 }
 const hero=p=>(p&&HEROES[p.hero_id])||{n:L('Герой #','Hero #','Герой #')+(p?p.hero_id:'?'),img:'',key:''};
 const heroImg=p=>hero(p).img?STEAM+hero(p).img:'';
@@ -775,11 +818,12 @@ function analyze(m){
     p.side=p.rad?'r':'d';p.team=sides[p.side];p.enemy=sides[p.rad?'d':'r'];
     p.won=p.rad===!!m.radiant_win;
     p.opp=p.enemy.find(e=>e.pos===OPP[p.pos])||null;
+    p.br=brOf(p,c);
   }
   for(const p of P){p.dl=deathList(p,c);p.fed=p.dl&&p.dl.some(d=>d.fed!=null)?p.dl.reduce((a,d)=>a+(d.fed||0),0):null}
   c.chat=chatList(c);
   for(const p of P)p.X=extras(p,c);
-  for(const p of P){p.A=aspects(p,c);finalize(p)}
+  for(const p of P){p.A=aspects(p,c);finalize(p,c)}
   const losers=m.radiant_win?sides.d:sides.r,winners=m.radiant_win?sides.r:sides.d;
   c.culprit=[...losers].sort((a,b)=>b.ruin-a.ruin)[0];
   c.mvp=[...winners].sort((a,b)=>a.ruin-b.ruin)[0];
@@ -919,15 +963,18 @@ function topKiller(p){
 }
 
 function aFarm(p,c){
-  const g=bp(p,'gold_per_min'),l=bp(p,'last_hits_per_min'),x=bp(p,'xp_per_min');
+  /* v4: спершу норма позиції + рангу з поправкою на героя (STRATZ), якщо її нема — перцентилі OpenDota лише за героєм */
+  const tg=fpct(p,c,'g'),tl=fpct(p,c,'l'),tx=fpct(p,c,'x');
+  const g=tg??bp(p,'gold_per_min'),l=tl??bp(p,'last_hits_per_min'),x=tx??bp(p,'xp_per_min');
+  const vs=(pc,t)=>t!=null?vsPos(pc,p):vsHero(pc,p);
   const nw=p.net_worth||p.total_gold||0,tnw=p.team.reduce((a,y)=>a+(y.net_worth||y.total_gold||0),0)||1,share=nw/tnw,exp=NW_SHARE[p.pos];
   const base=avg([g,l,x]);
   let s=base!=null?base*100:50+((p.gold_per_min||0)-GPM_NORM[p.pos])/6;
   s=cl(s+cl((share-exp)*120,-12,12));
   const F=[],min=c.dur/60,lh=p.last_hits||0;
-  F.push({c:g!=null?(g<.3?'bad':g>.7?'good':'info'):'info',t:`GPM ${p.gold_per_min||0}${g!=null?' — '+vsHero(g,p):''}.`});
-  if(p.pos<=3||(l!=null&&l>.7))F.push({c:l!=null?(l<.3?'bad':l>.7?'good':'info'):'info',t:`${lh} ${P(lh,'добивання|добивання|добивань','last hit|last hits','добивание|добивания|добиваний')} (${dec(lh/min)} ${L('за хв','per min','в мин')})${l!=null?' — '+vsHero(l,p):''}.`});
-  F.push({c:x!=null&&x<.3?'bad':x!=null&&x>.7?'good':'info',t:`XPM ${p.xp_per_min||0}, ${L('рівень','level','уровень')} ${p.level||'—'}${x!=null?' — '+vsHero(x,p):''}.`});
+  F.push({c:g!=null?(g<.3?'bad':g>.7?'good':'info'):'info',t:`GPM ${p.gold_per_min||0}${g!=null?' — '+vs(g,tg):''}.`});
+  if(p.pos<=3||(l!=null&&l>.7))F.push({c:l!=null?(l<.3?'bad':l>.7?'good':'info'):'info',t:`${lh} ${P(lh,'добивання|добивання|добивань','last hit|last hits','добивание|добивания|добиваний')} (${dec(lh/min)} ${L('за хв','per min','в мин')})${l!=null?' — '+vs(l,tl):''}.`});
+  F.push({c:x!=null&&x<.3?'bad':x!=null&&x>.7?'good':'info',t:`XPM ${p.xp_per_min||0}, ${L('рівень','level','уровень')} ${p.level||'—'}${x!=null?' — '+vs(x,tx):''}.`});
   F.push({c:p.pos<=3&&share<exp-.05?'bad':share>exp+.05?'good':'info',t:L(`${pct(share)} статків команди (${norm(p.pos,pct(exp))}).`,`${pct(share)} of team net worth (${norm(p.pos,pct(exp))}).`,`${pct(share)} богатства команды (${norm(p.pos,pct(exp))}).`)});
   const G=p.X&&p.X.gold;
   if(G&&G.total>0){
@@ -1024,12 +1071,93 @@ function aDec(p,c){
   return{s:cl(s),F,stats:[['TP',tp],[L('Байбеки','Buybacks','Байбеки'),bb],[L('Дисконекти','Disconnects','Дисконнекты'),dc]]};
 }
 
-function finalize(p){
+/* ---------- v4: «дурак»-бали за предмети (окремо від аспектів, додаються до руїнометра без стелі) ---------- */
+const DUMB_PTS={crit:25,imp:12,min:5};
+const DUMB_TIER=t=>({crit:L('критично','critical','критично'),imp:L('важливо','important','важно'),min:L('дрібниця','minor','мелочь')})[t];
+const BOOTS=/^(power_treads|phase_boots|arcane_boots|tranquil_boots|travel_boots(_2)?|guardian_greaves|boots_of_bearing)$/;
+const SIT_ITEMS=['spirit_vessel','lotus_orb','sphere','cyclone','wind_waker','manta','pipe','glimmer_cape','force_staff','ghost','aeon_disk','silver_edge','monkey_king_bar','nullifier','orchid','bloodthorn','heavens_halberd','shivas_guard','eternal_shroud','crimson_guard','solar_crest','disperser','black_king_bar'];
+const USE_SKIP=/^(power_treads|bfury|hand_of_midas|phase_boots|tranquil_boots|travel_boots(_2)?|magic_wand|bottle)$/;
+const FEAT=()=>({dis3:L('ворогів зі станами (3+ героїв з контролем)','a stun-heavy line-up (3+ heroes with disables)','врагов со станами (3+ героя с контролем)'),sil:L('сайленсів у ворогів','enemy silences','сайленсов у врагов'),heal:L('ворожих хілерів (2+)','enemy healers (2+)','вражеских хилеров (2+)')});
+function dumbEval(p,c){
+  const D={pts:0,F:[],whatIf:null};
+  if(!TB||!c.parsed||p.br==null||!Array.isArray(p.purchase_log)||p.leaver)return D;
+  const min=c.dur/60,hk=`${p.hero_id}_${p.pos}_${p.br}`,T=TB.items[hk]||[],share=k=>{const r=T.find(x=>x[0]===k);return r?r[1]:0};
+  const have=new Set(p.purchase_log.map(e=>e.key));
+  for(const s of['item_0','item_1','item_2','item_3','item_4','item_5','backpack_0','backpack_1','backpack_2'])if(p[s]&&ITEMS[p[s]])have.add(ITEMS[p[s]].k);
+  const covered=k=>have.has(k)||(UPG[k]||[]).some(u=>have.has(u))||(BOOTS.test(k)&&[...have].some(h=>BOOTS.test(h)));
+  const big=p.purchase_log.filter(e=>ITEMK[e.key]&&ITEMK[e.key].asm&&ITEMK[e.key].cost>=1000&&!/recipe/.test(e.key));
+  const spentAfter=m=>big.filter(e=>e.time>=m*60).reduce((a,e)=>a+ITEMK[e.key].cost,0);
+  const add=(tier,k,t,extra)=>{D.F.push({tier,k,t,pts:DUMB_PTS[tier],...extra});D.pts+=DUMB_PTS[tier]};
+  const tierOf=d=>d>=10?'crit':d>=5?'imp':'min';
+  /* 1. не зібрав коровий предмет героя на цій позиції й ранзі */
+  const miss=[];
+  for(const [k,sh,wrB,wrN,med,n] of T){
+    const it=ITEMK[k];if(!it||sh<40||med>25||wrN==null||min<med+8||covered(k))continue;
+    if((UPG[k]||[]).length&&sh<60)continue; /* проміжна частина (Perseverance, Yasha…) — штрафуємо лише якщо вона майже обов'язкова */
+    if(spentAfter(med)<it.cost)continue;
+    const d=Math.min(15,wrB-wrN);if(d<3)continue;
+    miss.push({k,sh,wrB,wrN,med,n,d,tier:sh>=60&&d>=10?'crit':d>=5?'imp':'min'});
+  }
+  miss.sort((a,b)=>b.d-a.d).slice(0,3).forEach(x=>{const n=ITEMK[x.k].n;
+    add(x.tier,x.k,L(`Не зібрав ${n}: його беруть ${x.sh}% гравців на ${H(p)} (${POS(p.pos)}, ${BRN[p.br]}), зазвичай до ~${x.med} хв. З ним вінрейт ${dec(x.wrB)}%, без нього ${dec(x.wrN)}% (на ${num(x.n)} іграх). Золото було: після ${x.med} хв пішло ${num(spentAfter(x.med))} на інші предмети.`,
+      `Never built ${n}: ${x.sh}% of ${H(p)} players (${POS(p.pos)}, ${BRN[p.br]}) get it, usually by ~${x.med} min. Win rate ${dec(x.wrB)}% with it, ${dec(x.wrN)}% without (${num(x.n)} games). The gold was there: ${num(spentAfter(x.med))} went into other items after minute ${x.med}.`,
+      `Не собрал ${n}: его берут ${x.sh}% игроков на ${H(p)} (${POS(p.pos)}, ${BRN[p.br]}), обычно к ~${x.med} мин. С ним винрейт ${dec(x.wrB)}%, без него ${dec(x.wrN)}% (на ${num(x.n)} играх). Золото было: после ${x.med} мин ушло ${num(spentAfter(x.med))} на другие предметы.`),{d:x.d,med:x.med})});
+  /* 2. ситуаційні предмети: BKB проти станів, Vessel проти хілу, Lotus/Eul проти сайленсів тощо */
+  const tags=e=>TB.tags[e.hero_id]||[0,0,0];
+  const disN=p.enemy.filter(e=>tags(e)[0]>0).length;
+  const feats={dis3:disN>=3,sil:p.enemy.some(e=>tags(e)[1]),heal:p.enemy.filter(e=>tags(e)[2]).length>=2};
+  const role=p.pos<=3?'c':'s',done=new Set(D.F.map(f=>f.k));
+  if(p.pos<=3&&min>=30&&disN>=3&&!covered('black_king_bar')&&!done.has('black_king_bar')&&share('black_king_bar')>=10&&spentAfter(20)>=8000){
+    const r=T.find(x=>x[0]==='black_king_bar'),d=r&&r[3]!=null?Math.min(15,r[2]-r[3]):5,tier=p.pos===1&&min>=35&&disN>=4?'crit':d>=10?'crit':'imp';
+    done.add('black_king_bar');
+    add(tier,'black_king_bar',L(`Без BKB проти ${disN} ворогів з контролем у ${mmss(c.dur)}-хвилинній грі, хоча після 20 хв витратив ${num(spentAfter(20))} золота. ${H(p)} на ${POS(p.pos)} беруть BKB у ${share('black_king_bar')}% ігор${r&&r[3]!=null?`, з ним вінрейт ${dec(r[2])}% проти ${dec(r[3])}%`:''}.`,
+      `No BKB against ${disN} enemies with disables in a ${mmss(c.dur)} game, despite spending ${num(spentAfter(20))} gold after minute 20. ${H(p)} ${POS(p.pos)} players buy BKB in ${share('black_king_bar')}% of games${r&&r[3]!=null?`, win rate ${dec(r[2])}% with it vs ${dec(r[3])}%`:''}.`,
+      `Без BKB против ${disN} врагов с контролем в ${mmss(c.dur)}-минутной игре, хотя после 20 мин потратил ${num(spentAfter(20))} золота. ${H(p)} на ${POS(p.pos)} берут BKB в ${share('black_king_bar')}% игр${r&&r[3]!=null?`, с ним винрейт ${dec(r[2])}% против ${dec(r[3])}%`:''}.`),{d,med:r?r[4]:25});
+  }
+  if(min>=25)for(const f in feats){if(!feats[f])continue;
+    const A=TB.sit[`${role}|${f}|1`]||{},B=TB.sit[`${role}|${f}|0`]||{};
+    for(const k of SIT_ITEMS){
+      if(done.has(k)||!A[k]||!B[k]||covered(k)||share(k)<10)continue;
+      const it=ITEMK[k],d=+(A[k][0]-B[k][0]).toFixed(1);if(!it||d<3||spentAfter(15)<it.cost)continue;
+      done.add(k);
+      add(tierOf(d),k,L(`Проти ${FEAT()[f]} не взяв ${it.n}: у таких іграх цей предмет піднімає вінрейт на ${dec(d)} п.п. більше, ніж зазвичай (на ${num(A[k][1])} іграх). ${H(p)} купують його в ${share(k)}% ігор.`,
+        `Against ${FEAT()[f]} skipped ${it.n}: in such games it adds ${dec(d)} pp more win rate than usual (${num(A[k][1])} games). ${H(p)} players buy it in ${share(k)}% of games.`,
+        `Против ${FEAT()[f]} не взял ${it.n}: в таких играх этот предмет поднимает винрейт на ${dec(d)} п.п. больше, чем обычно (на ${num(A[k][1])} играх). ${H(p)} покупают его в ${share(k)}% игр.`),{d,med:(T.find(x=>x[0]===k)||[])[4]||20});
+    }
+  }
+  /* 3. купив, але тиснув набагато рідше за інших (норма — натискань за хвилину володіння) */
+  const uses=p.item_uses||{},first={};for(const e of p.purchase_log)if(first[e.key]==null)first[e.key]=e.time;
+  const never=new Set((p.X&&p.X.items||[]).filter(i=>i.bad).map(i=>i.key));
+  for(const k in first){
+    const U=TB.use[k];if(!U||USE_SKIP.test(k)||never.has(k)||U[2]<.1)continue;
+    const own=(c.dur-Math.max(0,first[k]))/60;if(own<8)continue;
+    const u=uses[k]||0,ratio=u/own/U[2];if(ratio>=.45)continue;
+    const it=ITEMK[k];if(!it)continue;
+    add(ratio<.2?'imp':'min',k,L(`${it.n}: ${u} ${P(u,'натискання|натискання|натискань')} за ${Math.round(own)} хв — у половини гравців ≥ ${dec(U[2]*own,0)} за той самий час (норма ${dec(U[2]*10)} на 10 хв, ${num(U[3])} випадків).`,
+      `${it.n}: ${u} ${P(u,'','use|uses')} in ${Math.round(own)} min — half of players get ≥ ${dec(U[2]*own,0)} in the same time (norm ${dec(U[2]*10)} per 10 min, ${num(U[3])} cases).`,
+      `${it.n}: ${u} ${P(u,'','','нажатие|нажатия|нажатий')} за ${Math.round(own)} мин — у половины игроков ≥ ${dec(U[2]*own,0)} за то же время (норма ${dec(U[2]*10)} на 10 мин, ${num(U[3])} случаев).`));
+  }
+  /* 4. Манта: фарм після покупки має прискоритися, а не впасти */
+  if(first.manta!=null&&Array.isArray(p.lh_t)){const m0=Math.ceil(first.manta/60),lt=p.lh_t;
+    if(m0>=8&&lt.length>m0+8){const before=(lt[m0]-lt[m0-8])/8,after=(lt[m0+8]-lt[m0])/8;
+      if(before>=3&&after<before*.9)add('min','manta_lh',L(`Після Manta Style (${mmss(first.manta)}) фармив повільніше: ${dec(after)} добивання за хв проти ${dec(before)} до неї — ілюзії не використовувались для фарму.`,`After Manta Style (${mmss(first.manta)}) farm got slower: ${dec(after)} last hits/min vs ${dec(before)} before — illusions weren’t used to farm.`,`После Manta Style (${mmss(first.manta)}) фармил медленнее: ${dec(after)} добиваний в мин против ${dec(before)} до неё — иллюзии не использовались для фарма.`))}}
+  D.F.sort((a,b)=>b.pts-a.pts);
+  const wi=D.F.filter(f=>f.d!=null&&ITEMK[f.k]).sort((a,b)=>b.d-a.d)[0];
+  if(wi)D.whatIf={k:wi.k,n:ITEMK[wi.k].n,med:wi.med,d:wi.d};
+  return D;
+}
+const isFriend=p=>!!p.account_id&&accs().list.some(x=>x.id===p.account_id);
+const DUMB=p=>isFriend(p)?L('Дурак','Fool','Дурак'):L('Еблан','Idiot','Еблан');
+const whatIfTxt=w=>L(`Якби зібрав ${w.n} до ~${w.med} хв, шанс на перемогу був би ≈ +${dec(w.d,0)}% (за статистикою STRATZ).`,`With ${w.n} by ~${w.med} min the win chance would be ≈ +${dec(w.d,0)}% (STRATZ stats).`,`Если бы собрал ${w.n} к ~${w.med} мин, шанс на победу был бы ≈ +${dec(w.d,0)}% (по статистике STRATZ).`);
+
+function finalize(p,c){
   const w=W[p.pos]||W[3];let tw=0,acc=0;
   for(const k of ASP_KEYS){const a=p.A[k];if(a&&w[k]){acc+=a.s*w[k];tw+=w[k]}}
   p.R=tw?acc/tw:50;
   p.leaver=(p.leaver_status||0)>=2;
-  p.ruin=p.leaver?100:Math.round(cl(100-p.R));
+  p.ruin0=p.leaver?100:Math.round(cl(100-p.R));
+  p.D=dumbEval(p,c);
+  p.ruin=p.leaver?100:Math.min(100,p.ruin0+p.D.pts);
   p.worst=ASPECTS().filter(([k])=>p.A[k]&&w[k]>=.1&&p.A[k].s<50).map(([k,n])=>({k,n,s:p.A[k].s,w:w[k]})).sort((a,b)=>(a.s-50)*a.w-(b.s-50)*b.w)[0]||null;
 }
 
@@ -1143,6 +1271,7 @@ function renderDossier(){
       ${bad.length?`<div class="sub-h">${L('Головні помилки','Main mistakes','Главные ошибки')}</div><ul class="facts">${bad.map(f=>`<li class="bad">${esc(f.t)}</li>`).join('')}</ul>`:''}
       ${good.length?`<div class="sub-h">${L('Що вийшло','What went well','Что получилось')}</div><ul class="facts">${good.map(f=>`<li class="good">${esc(f.t)}</li>`).join('')}</ul>`:''}
       ${!bad.length&&!good.length?`<ul class="facts"><li class="info">${L('Статистика рівна: ні яскравих провалів, ні помітних плюсів.','Even stats: no glaring failures, no standout plays.','Статистика ровная: ни ярких провалов, ни заметных плюсов.')}</li></ul>`:''}
+      ${dumbHtml(p)}
       ${(()=>{const T=tipsFor(p);return T.length?`<div class="sub-h">${L('Поради з цифрами','Tips with numbers','Советы с цифрами')}</div><ul class="facts">${T.map(t=>`<li class="tip">${esc(t)}</li>`).join('')}</ul>`:''})()}
       <div class="share"><button type="button" id="shImg">${L('Картинка для чату','Image for chat','Картинка для чата')}</button><button type="button" id="shLink" class="ghost">${L('Скопіювати посилання','Copy link','Скопировать ссылку')}</button></div>
       ${!isC?`<button class="back" type="button" id="backBtn">${L('← До головного підозрюваного','← Back to prime suspect','← К главному подозреваемому')}</button>`:''}
@@ -1156,6 +1285,13 @@ function renderDossier(){
   $('dossier').querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>select(+b.dataset.sel));
   $('dossier').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;renderTab();b.scrollIntoView({block:'nearest',inline:'center'})});
   renderTab();
+}
+
+function dumbHtml(p){
+  const D=p.D;if(!D||!D.F.length)return '';
+  return `<div class="sub-h">${DUMB(p)}-${L('бали','points','баллы')}: +${D.pts} ${L('до руїнометра','to the ruin meter','к руинометру')} <small style="color:var(--muted);font-weight:400">${L(`(без них ${p.ruin0})`,`(${p.ruin0} without them)`,`(без них ${p.ruin0})`)}</small></div>
+  <ul class="facts">${D.F.map(f=>`<li class="bad"><span><b>+${f.pts} · ${DUMB_TIER(f.tier)}.</b> ${esc(f.t)}</span></li>`).join('')}${D.whatIf?`<li class="tip">${esc(whatIfTxt(D.whatIf))}</li>`:''}</ul>
+  <div class="note">${L('Приблизно: це статистика STRATZ по тисячах ігор на цьому герої, позиції й ранзі, а не аналіз конкретної ситуації.','Approximate: STRATZ stats over thousands of games on this hero, position and rank, not an analysis of this exact situation.','Примерно: это статистика STRATZ по тысячам игр на этом герое, позиции и ранге, а не анализ конкретной ситуации.')}</div>`;
 }
 
 /* ---------- вкладки досьє ---------- */
@@ -1216,6 +1352,12 @@ function itemsHtml(p){
   const buys=(p.purchase_log||[]).filter(e=>{const it=ITEMK[e.key];return it&&!/recipe/.test(e.key)&&((it.asm&&it.cost>=1000)||(/boots/.test(e.key)&&it.cost>=500))});
   h+=`<div class="sec-h"><h3>${L('Порядок предметів','Item order','Порядок предметов')}</h3><small>${L('тільки готові предмети від 1000 золота','completed items worth 1000+ only','только готовые предметы от 1000 золота')}</small></div>`;
   h+=buys.length?`<div class="itl">${buys.map(e=>`<div title="${esc(ITEMK[e.key].n)}"><img src="${STEAM+ITEMK[e.key].img}" alt="${esc(ITEMK[e.key].n)}" onerror="this.style.visibility='hidden'">${mmss(e.time)}</div>`).join('')}</div>`:noData();
+  const ti=TB&&p.br!=null&&TB.items[`${p.hero_id}_${p.pos}_${p.br}`];
+  if(ti&&ti.length){const got=new Set((p.purchase_log||[]).map(e=>e.key)),hd=[L('Предмет','Item','Предмет'),L('Беруть','Bought by','Берут'),L('Зазвичай','Usually','Обычно'),L('Вінрейт з / без','Win rate with / without','Винрейт с / без'),L('У тебе','You','У тебя')];
+    h+=`<div class="sec-h"><h3>${L(`Що збирають ${esc(H(p))} на ${POS(p.pos)} у ${BRN[p.br]}`,`What ${esc(H(p))} ${POS(p.pos)} players build in ${BRN[p.br]}`,`Что собирают ${esc(H(p))} на ${POS(p.pos)} в ${BRN[p.br]}`)}</h3><small>STRATZ · ${L('патч','patch','патч')} ${esc(TB.v)}</small></div>
+    <div class="tbl-wrap"><table class="dtable"><thead><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${ti.filter(r=>ITEMK[r[0]]).map(([k,sh,wrB,wrN,med,n])=>{const it=ITEMK[k],own=got.has(k)||(UPG[k]||[]).some(u=>got.has(u));
+      return `<tr><td class="k" data-l="${hd[0]}"><img src="${STEAM+it.img}" alt="">${esc(it.n)}</td><td class="mono" data-l="${hd[1]}">${sh}%</td><td class="mono" data-l="${hd[2]}">~${med} ${L('хв','min','мин')}</td><td class="mono" data-l="${hd[3]}">${dec(wrB)}% / ${wrN!=null?dec(wrN)+'%':'—'}</td><td data-l="${hd[4]}">${own?`<span class="flag ok">${L('є','yes','есть')}</span>`:`<span class="flag info">${L('нема','no','нет')}</span>`}</td></tr>`}).join('')}</tbody></table></div>
+    <div class="note">${L(`На ${num(ti[0][5])}+ іграх. Вінрейт «з» вищий ще й тому, що предмет встигають купити в іграх, які йдуть добре, тож це підказка, а не закон.`,`Based on ${num(ti[0][5])}+ games. The “with” win rate is also higher because items get bought in games that go well, so treat it as a hint, not a law.`,`На ${num(ti[0][5])}+ играх. Винрейт «с» выше ещё и потому, что предмет успевают купить в играх, которые идут хорошо, так что это подсказка, а не закон.`)}</div>`}
   const its=p.X.items;
   h+=`<div class="sec-h"><h3>${L('Як використовував активні предмети','Active item usage','Как использовал активные предметы')}</h3></div>`;
   if(its.length){const hd=[L('Предмет','Item','Предмет'),L('Куплено','Bought','Куплен'),L('Натискань','Uses','Нажатий'),L('Висновок','Verdict','Вывод')];
@@ -1901,7 +2043,7 @@ async function waitOpenDota(id){
     try{const m=await getJson(API+'/matches/'+id,null,true);
       if(m&&Array.isArray(m.players)&&m.players.length>1&&m.duration&&m.radiant_win!=null){
         clearInterval(waitTimer);
-        if((S&&String(S.m.match_id)===String(id))||parseId($('mid').value)===String(id)){await loadConst();show(m);setStatus(L('Матч з’явився на OpenDota — показую повний розбір.','The match is now on OpenDota — showing the full breakdown.','Матч появился на OpenDota — показываю полный разбор.'));try{history.replaceState(null,'','#'+id)}catch(e){}}
+        if((S&&String(S.m.match_id)===String(id))||parseId($('mid').value)===String(id)){await loadConst();await loadTables();show(m);setStatus(L('Матч з’явився на OpenDota — показую повний розбір.','The match is now on OpenDota — showing the full breakdown.','Матч появился на OpenDota — показываю полный разбор.'));try{history.replaceState(null,'','#'+id)}catch(e){}}
         return}}catch(e){}
     if(n>=24){clearInterval(waitTimer);if(!S||String(S.m.match_id)!==String(id))setStatus(L('OpenDota так і не отримав цей матч за 6 хвилин. Перевір ID або спробуй пізніше.','OpenDota still hasn’t got this match after 6 minutes. Check the ID or try later.','OpenDota так и не получил этот матч за 6 минут. Проверь ID или попробуй позже.'),'err')}
   },15000);
@@ -1918,7 +2060,7 @@ async function fallback(id){
   let msg='';
   if(stzKey()){
     setStatus(L(`OpenDota ще не має матчу ${id} — беру дані зі STRATZ…`,`OpenDota doesn’t have match ${id} yet — getting it from STRATZ…`,`У OpenDota ещё нет матча ${id} — беру данные из STRATZ…`),'load');
-    try{const m=await fromStratz(id);await loadConst();show(m);setStatus('');try{history.replaceState(null,'','#'+id)}catch(e){}
+    try{const m=await fromStratz(id);await loadConst();await loadTables();show(m);setStatus('');try{history.replaceState(null,'','#'+id)}catch(e){}
       $('result').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return}
     catch(e){msg=e.message}
   }
@@ -2038,7 +2180,7 @@ const isWin=m=>(m.player_slot<128)===m.radiant_win;
 const VCACHE={};
 async function verdictFor(mid,acc){
   const key=mid+':'+acc;if(VCACHE[key])return VCACHE[key];
-  const m=await getMatch(mid);if(!matchOk(m))throw new Error('no match');
+  await loadTables();const m=await getMatch(mid);if(!matchOk(m))throw new Error('no match');
   const c=analyze(m),me=c.P.find(p=>p.account_id===acc);
   const v={won:me?me.won:null,ruin:me?me.ruin:null,verd:me?verdOf(me.ruin):null,meCulprit:me&&me===c.culprit,meMvp:me&&me===c.mvp,culprit:{hero:c.culprit.hero_id,ruin:c.culprit.ruin,name:pname(c.culprit)},mvp:c.mvp?{hero:c.mvp.hero_id,ruin:c.mvp.ruin}:null,parsed:c.parsed};
   VCACHE[key]=v;return v;
@@ -2095,6 +2237,7 @@ const MISTAKES=[
   {k:'items',test:r=>r.unused.length>0,name:()=>L('куплені предмети без використання','items bought but never used','купленные предметы без использования'),tip:(rs,N)=>{const c={};rs.forEach(r=>r.unused.forEach(k=>c[k]=(c[k]||0)+1));const t=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,n])=>(ITEMK[k]?ITEMK[k].n:k)+' ×'+n).join(', ');return L(`У ${rs.length} з ${N} ігор купував активні предмети і не натискав їх: ${t}.`,`In ${rs.length} of ${N} games you bought active items and never used them: ${t}.`,`В ${rs.length} из ${N} игр покупал активные предметы и не нажимал их: ${t}.`)}},
   {k:'tp',test:r=>r.tp10!=null&&r.tp10<.7&&r.dur>1200,name:()=>L('мало телепортів','too few teleports','мало телепортов'),tip:(rs,N)=>L(`У ${rs.length} з ${N} ігор лише ${dec(avg(rs.map(r=>r.tp)),1)} TP за гру (≈ ${dec(avg(rs.map(r=>r.tp10)))} на 10 хв) — пізно на бійки й захист веж.`,`In ${rs.length} of ${N} games only ${dec(avg(rs.map(r=>r.tp)),1)} TPs per game (≈ ${dec(avg(rs.map(r=>r.tp10)))} per 10 min) — late to fights and tower defense.`,`В ${rs.length} из ${N} игр всего ${dec(avg(rs.map(r=>r.tp)),1)} ТП за игру (≈ ${dec(avg(rs.map(r=>r.tp10)))} на 10 мин) — поздно на драки и защиту башен.`)},
   {k:'wards',test:r=>r.pos>=4&&r.w10!=null&&r.w10<WARD_NORM[r.pos]*.6,name:()=>L('мало вардів на сапорті','too few wards as support','мало вардов на саппорте'),tip:(rs,N)=>L(`У ${rs.length} з ${N} ігор на сапорті лише ${dec(avg(rs.map(r=>r.w10)))} вардів за 10 хв при нормі ≈ ${dec(avg(rs.map(r=>WARD_NORM[r.pos])))}.`,`In ${rs.length} of ${N} support games only ${dec(avg(rs.map(r=>r.w10)))} wards per 10 min vs ≈ ${dec(avg(rs.map(r=>WARD_NORM[r.pos])))} normal.`,`В ${rs.length} из ${N} игр на саппорте всего ${dec(avg(rs.map(r=>r.w10)))} вардов за 10 мин при норме ≈ ${dec(avg(rs.map(r=>WARD_NORM[r.pos])))}.`)},
+  {k:'dumb',test:r=>r.dumb>=12,name:()=>L('дурак-бали за предмети','fool points for items','дурак-баллы за предметы'),tip:(rs,N)=>{const c={};rs.forEach(r=>(r.dumbK||[]).forEach(k=>c[k]=(c[k]||0)+1));const t=Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,n])=>(ITEMK[k]?ITEMK[k].n:k)+' ×'+n).join(', ');return L(`У ${rs.length} з ${N} ігор отримував дурак-бали за предмети: в середньому +${dec(avg(rs.map(r=>r.dumb)),0)} до руїнометра. Найчастіше: ${t||'—'}.`,`In ${rs.length} of ${N} games you got fool points for items: +${dec(avg(rs.map(r=>r.dumb)),0)} ruin on average. Most often: ${t||'—'}.`,`В ${rs.length} из ${N} игр получал дурак-баллы за предметы: в среднем +${dec(avg(rs.map(r=>r.dumb)),0)} к руинометру. Чаще всего: ${t||'—'}.`)}},
   {k:'jungle',test:r=>r.pos<=3&&r.jungle,name:()=>L('фармив ліс, поки команда билась','farmed jungle while team fought','фармил лес, пока команда дралась'),tip:(rs,N)=>L(`У ${rs.length} з ${N} ігор ${pct(avg(rs.map(r=>r.nshare)))} золота було з лісу, а участь у вбивствах — ${pct(avg(rs.map(r=>r.kp)))}.`,`In ${rs.length} of ${N} games ${pct(avg(rs.map(r=>r.nshare)))} of gold came from the jungle with only ${pct(avg(rs.map(r=>r.kp)))} kill participation.`,`В ${rs.length} из ${N} игр ${pct(avg(rs.map(r=>r.nshare)))} золота было из леса, а участие в убийствах — ${pct(avg(rs.map(r=>r.kp)))}.`)}
 ];
 /* рядок статистики гравця з розібраного матчу */
@@ -2108,13 +2251,14 @@ function statRow(c,me){
     kp:((me.kills||0)+(me.assists||0))/tk,kpN:KP_NORM[me.pos],gpmPct:bp(me,'gold_per_min'),
     bkbIdle:(me.X&&me.X.fights||[]).filter(f=>f.bkbIdle).length,unused:(me.X&&me.X.items||[]).filter(i=>i.bad).map(i=>i.key),
     tp,tp10:tp!=null?tp/(c.dur/600):null,w10:c.parsed?((me.obs_placed||0)+(me.sen_placed||0))/(c.dur/600):null,
+    dumb:me.D?me.D.pts:0,dumbK:me.D?me.D.F.map(f=>f.k).filter(k=>ITEMK[k]):[],
     nshare:G&&G.total?G.g.neutral/G.total:0,jungle:!!(G&&G.total&&G.g.neutral/G.total>=.4&&((me.kills||0)+(me.assists||0))/tk<KP_NORM[me.pos]-.1)};
 }
 
 /* ---- збирання статистики по N матчах (з кешем і паузами, щоб не впертися в ліміт) ---- */
 const STJ={};
 async function buildRows(acc,list,job,onTick){
-  job.total=list.length;job.done=0;job.rows=[];
+  await loadTables();job.total=list.length;job.done=0;job.rows=[];
   for(const m of list){
     if(job.cancel)return;
     const cached=await cacheGet(m.match_id);
@@ -2200,13 +2344,13 @@ function renderCrew(){
   if(!j){
     CRJ[key]={loading:true,done:0,total:20};
     (async()=>{const J=CRJ[key];try{
-      const seen=new Map();
+      await loadTables();const seen=new Map();
       for(const f of fr.slice(0,6)){const r=await getJson(API+`/players/${me.id}/matches?included_account_id=${f.id}&limit=25`,null,true);(Array.isArray(r)?r:[]).filter(m=>m.game_mode!==23).forEach(m=>seen.set(m.match_id,m));await sleep(900)}
       const list=[...seen.values()].sort((x,y)=>y.start_time-x.start_time).slice(0,20);
       J.total=list.length;J.done=0;J.games=[];
       for(const m of list){
         const cached=await cacheGet(m.match_id);
-        try{const mm=await getMatch(m.match_id);if(matchOk(mm)){const c=analyze(mm),mp=c.P.find(p=>p.account_id===me.id);if(mp){const ids=new Set([me.id,...fr.map(x=>x.id)]);const crew=c.P.filter(p=>p.rad===mp.rad&&ids.has(p.account_id));if(crew.length>=2)J.games.push({mid:m.match_id,t:mm.start_time,won:mp.won,crew:crew.map(p=>({id:p.account_id,hero:p.hero_id,ruin:p.ruin,culprit:p===c.culprit,mvp:p===c.mvp}))})}}}
+        try{const mm=await getMatch(m.match_id);if(matchOk(mm)){const c=analyze(mm),mp=c.P.find(p=>p.account_id===me.id);if(mp){const ids=new Set([me.id,...fr.map(x=>x.id)]);const crew=c.P.filter(p=>p.rad===mp.rad&&ids.has(p.account_id));if(crew.length>=2)J.games.push({mid:m.match_id,t:mm.start_time,won:mp.won,crew:crew.map(p=>({id:p.account_id,hero:p.hero_id,ruin:p.ruin,dumb:p.D?p.D.pts:0,culprit:p===c.culprit,mvp:p===c.mvp}))})}}}
         catch(e){if(e.status===429)await sleep(20000)}
         J.done++;if(V.view==='crew')throttle(renderCrew);
         if(!(cached&&cached.m&&cached.m.version!=null))await sleep(1100);
@@ -2227,12 +2371,12 @@ function bindCrew(el){
 }
 function crewBody(G,members){
   const st=members.map(x=>{const gs=G.filter(g=>g.crew.some(c=>c.id===x.id)),mine=gs.map(g=>g.crew.find(c=>c.id===x.id));
-    return{x,n:gs.length,w:gs.filter(g=>g.won).length,cul:mine.filter(c=>c.culprit).length,mvp:mine.filter(c=>c.mvp).length,worst:gs.filter(g=>{const c=g.crew.find(c=>c.id===x.id);return Math.max(...g.crew.map(y=>y.ruin))===c.ruin&&g.crew.length>1}).length,ar:mine.length?avg(mine.map(c=>c.ruin)):null}}).filter(s=>s.n);
+    return{x,n:gs.length,w:gs.filter(g=>g.won).length,cul:mine.filter(c=>c.culprit).length,mvp:mine.filter(c=>c.mvp).length,worst:gs.filter(g=>{const c=g.crew.find(c=>c.id===x.id);return Math.max(...g.crew.map(y=>y.ruin))===c.ruin&&g.crew.length>1}).length,ar:mine.length?avg(mine.map(c=>c.ruin)):null,dumb:mine.length?avg(mine.map(c=>c.dumb||0)):0}}).filter(s=>s.n);
   const feeder=st.slice().sort((a,b)=>b.cul-a.cul||b.ar-a.ar)[0],carry=st.slice().sort((a,b)=>a.ar-b.ar)[0];
-  const W=G.filter(g=>g.won).length;
-  let h=`<div class="tiles" style="margin-top:14px"><div><small>${L('Спільних ігор','Shared games','Общих игр')}</small><b>${G.length}</b></div><div><small>${L('Вінрейт разом','Win rate together','Винрейт вместе')}</small><b>${pct(W/G.length)}</b></div><div><small>${L('Головний фідер компанії','Crew’s top feeder','Главный фидер компании')}</small><b class="c3">${esc(feeder.x.name)}</b></div><div><small>${L('Тащер компанії','Crew’s carry','Тащер компании')}</small><b class="c0">${esc(carry.x.name)}</b></div></div>`;
+  const W=G.filter(g=>g.won).length,fool=st.slice().sort((a,b)=>b.dumb-a.dumb)[0];
+  let h=`<div class="tiles" style="margin-top:14px"><div><small>${L('Спільних ігор','Shared games','Общих игр')}</small><b>${G.length}</b></div><div><small>${L('Вінрейт разом','Win rate together','Винрейт вместе')}</small><b>${pct(W/G.length)}</b></div><div><small>${L('Головний фідер компанії','Crew’s top feeder','Главный фидер компании')}</small><b class="c3">${esc(feeder.x.name)}</b></div><div><small>${L('Тащер компанії','Crew’s carry','Тащер компании')}</small><b class="c0">${esc(carry.x.name)}</b></div></div>${fool&&fool.dumb>=1?`<div class="note" style="margin-top:10px">${L(`Найбільший дурак компанії: <b>${esc(fool.x.name)}</b> — в середньому +${dec(fool.dumb)} дурак-балів за гру (предмети, яких не зібрав або не тиснув).`,`The crew’s biggest fool: <b>${esc(fool.x.name)}</b> — +${dec(fool.dumb)} fool points per game on average (items not built or not used).`,`Главный дурак компании: <b>${esc(fool.x.name)}</b> — в среднем +${dec(fool.dumb)} дурак-баллов за игру (предметы, которые не собрал или не нажимал).`)}</div>`:''}`;
   h+=`<div class="sec-h"><h3>${L('Таблиця ганьби','Hall of shame','Таблица позора')}</h3><small>${L('злив — головний винуватець поразки; найгірший — найвищий руїнометр серед вас у грі','threw = main culprit of a loss; worst = highest ruin among you in a game','слил — главный виновник поражения; худший — самый высокий руинометр среди вас в игре')}</small></div>
-  <div class="tbl-wrap"><table class="dtable crew-t"><thead><tr><th>${L('Гравець','Player','Игрок')}</th><th>${L('Ігор','Games','Игр')}</th><th>${L('Вінрейт','Win rate','Винрейт')}</th><th>${L('Злив','Threw','Слил')}</th><th>${L('Найгірший','Worst','Худший')}</th><th>MVP</th><th>${L('Сер. руїнометр','Avg ruin','Ср. руинометр')}</th></tr></thead><tbody>${st.sort((a,b)=>b.cul-a.cul||b.ar-a.ar).map(s=>{const v=verdOf(Math.round(s.ar));return `<tr><td class="k" data-l="${L('Гравець','Player','Игрок')}">${s.x.avatar?`<img src="${esc(s.x.avatar)}" alt="" style="width:24px;height:24px;border-radius:50%">`:''}${esc(s.x.name)}</td><td class="mono" data-l="${L('Ігор','Games','Игр')}">${s.n}</td><td class="mono" data-l="${L('Вінрейт','Win rate','Винрейт')}">${pct(s.w/s.n)}</td><td class="mono c3" data-l="${L('Злив','Threw','Слил')}">${s.cul}</td><td class="mono" data-l="${L('Найгірший','Worst','Худший')}">${s.worst}</td><td class="mono c0" data-l="MVP">${s.mvp}</td><td data-l="${L('Сер. руїнометр','Avg ruin','Ср. руинометр')}"><span class="c${v.c}"><b class="mono">${Math.round(s.ar)}</b> ${v.t}</span></td></tr>`}).join('')}</tbody></table></div>`;
+  <div class="tbl-wrap"><table class="dtable crew-t"><thead><tr><th>${L('Гравець','Player','Игрок')}</th><th>${L('Ігор','Games','Игр')}</th><th>${L('Вінрейт','Win rate','Винрейт')}</th><th>${L('Злив','Threw','Слил')}</th><th>${L('Найгірший','Worst','Худший')}</th><th>MVP</th><th>${L('Дурак-бали','Fool pts','Дурак-баллы')}</th><th>${L('Сер. руїнометр','Avg ruin','Ср. руинометр')}</th></tr></thead><tbody>${st.sort((a,b)=>b.cul-a.cul||b.ar-a.ar).map(s=>{const v=verdOf(Math.round(s.ar));return `<tr><td class="k" data-l="${L('Гравець','Player','Игрок')}">${s.x.avatar?`<img src="${esc(s.x.avatar)}" alt="" style="width:24px;height:24px;border-radius:50%">`:''}${esc(s.x.name)}</td><td class="mono" data-l="${L('Ігор','Games','Игр')}">${s.n}</td><td class="mono" data-l="${L('Вінрейт','Win rate','Винрейт')}">${pct(s.w/s.n)}</td><td class="mono c3" data-l="${L('Злив','Threw','Слил')}">${s.cul}</td><td class="mono" data-l="${L('Найгірший','Worst','Худший')}">${s.worst}</td><td class="mono c0" data-l="MVP">${s.mvp}</td><td class="mono" data-l="${L('Дурак-бали','Fool pts','Дурак-баллы')}">${s.dumb?'+'+dec(s.dumb):'0'}</td><td data-l="${L('Сер. руїнометр','Avg ruin','Ср. руинометр')}"><span class="c${v.c}"><b class="mono">${Math.round(s.ar)}</b> ${v.t}</span></td></tr>`}).join('')}</tbody></table></div>`;
   const byId=Object.fromEntries(members.map(x=>[x.id,x]));
   h+=`<div class="sec-h"><h3>${L('Спільні ігри','Shared games','Общие игры')}</h3></div><div class="mlist">${G.map(g=>`<div class="mrow crow" role="button" tabindex="0" data-open="${g.mid}"><span class="pill ${g.won?'r':'d'}">${g.won?L('Перемога','Win','Победа'):L('Поразка','Loss','Поражение')}</span><div class="mi"><small>${ago(g.t)}</small></div><div class="cm">${g.crew.map(c=>{const hh=HEROES[c.hero],v=verdOf(c.ruin);return `<span class="cmp${c.culprit?' bad':''}" title="${esc((byId[c.id]?byId[c.id].name:'')+' · '+(hh?hh.n:''))}">${hh?`<img src="${STEAM+hh.img}" alt="">`:''}<b class="c${v.c}">${c.ruin}</b>${c.culprit?`<em>${L('злив','threw','слил')}</em>`:c.mvp?`<em class="c0">MVP</em>`:''}</span>`}).join('')}</div></div>`).join('')}</div>`;
   return h;
@@ -2267,6 +2411,7 @@ async function drawCard(){
   g.font='700 24px JetBrains Mono, monospace';g.fillStyle='#8a93a3';g.fillText(`/100`,x0+nw+24,446);
   g.fillStyle='#e8ebf0';g.font='700 28px JetBrains Mono, monospace';g.fillText(`K/D/A ${p.kills}/${p.deaths}/${p.assists}   GPM ${p.gold_per_min||0}`,x0,510,660-x0);
   g.fillStyle='#8a93a3';g.font='500 22px Onest, Segoe UI, sans-serif';g.fillText(`Radiant ${m.radiant_score??''} : ${m.dire_score??''} Dire · ${mmss(S.dur)} · ${matchUrl(m.match_id).replace(/^https?:\/\//,'')}`,x0,560,660-x0);
+  if(p.D&&p.D.pts){g.fillStyle=col('--tape')||'#f5c443';g.font='600 19px Onest, Segoe UI, sans-serif';g.fillText(`${DUMB(p).toUpperCase()}-${L('БАЛИ','POINTS','БАЛЛЫ')} +${p.D.pts}${p.D.whatIf?' · '+whatIfTxt(p.D.whatIf):''}`,x0,598,W-x0-40)}
   return cv;
 }
 async function shareCard(){
@@ -2337,7 +2482,7 @@ async function run(raw){
   setStatus(L(`Дістаю матч ${id} з OpenDota…`,`Fetching match ${id} from OpenDota…`,`Достаю матч ${id} из OpenDota…`),'load');
   try{
     showSkel();
-    const [m]=await Promise.all([getMatch(id),loadConst()]);
+    const [m]=await Promise.all([getMatch(id),loadConst(),loadTables()]);
     if(!m||!Array.isArray(m.players)||m.players.length<2)throw new Error(L('OpenDota повернув матч без гравців. Спробуй інший ID.','OpenDota returned a match with no players. Try another ID.','OpenDota вернул матч без игроков. Попробуй другой ID.'));
     if(!m.duration||m.radiant_win==null||m.players.every(p=>!p.hero_id))throw new Error(L('Цей матч ще йде або OpenDota ще не отримав його результат. Спробуй через кілька хвилин після кінця гри.','This match is still in progress or OpenDota doesn’t have the result yet. Try a few minutes after the game ends.','Этот матч ещё идёт или OpenDota ещё не получил его результат. Попробуй через несколько минут после конца игры.'));
     show(m);setStatus('');
@@ -2365,7 +2510,8 @@ $('form').addEventListener('submit',e=>{e.preventDefault();run($('mid').value)})
 $('mid').addEventListener('paste',()=>setTimeout(()=>{const id=parseId($('mid').value);if(id&&id!==$('mid').value)$('mid').value=id},0));
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(S&&graphNarrow!==null&&(($('graphBox').clientWidth||innerWidth)<600)!==graphNarrow)renderGraph()},150)});
-const c0=store.get('nf_const_v3');if(c0){HEROES=c0.h;ITEMS=c0.i}
+const c0=store.get('nf_const_v4');if(c0){HEROES=c0.h;ITEMS=c0.i;indexConst()}
+loadTables();
 applyStatic();renderChips();
 (function boot(){const h=location.hash.replace('#',''),id=parseId(h);
   if(id){setView('match',false);run(id)}
