@@ -1141,6 +1141,22 @@ function dumbEval(p,c){
   if(first.manta!=null&&Array.isArray(p.lh_t)){const m0=Math.ceil(first.manta/60),lt=p.lh_t;
     if(m0>=8&&lt.length>m0+8){const before=(lt[m0]-lt[m0-8])/8,after=(lt[m0+8]-lt[m0])/8;
       if(before>=3&&after<before*.9)add('min','manta_lh',L(`Після Manta Style (${mmss(first.manta)}) фармив повільніше: ${dec(after)} добивання за хв проти ${dec(before)} до неї — ілюзії не використовувались для фарму.`,`After Manta Style (${mmss(first.manta)}) farm got slower: ${dec(after)} last hits/min vs ${dec(before)} before — illusions weren’t used to farm.`,`После Manta Style (${mmss(first.manta)}) фармил медленнее: ${dec(after)} добиваний в мин против ${dec(before)} до неё — иллюзии не использовались для фарма.`))}}
+  /* 5. скіли: натискань за хвилину проти норми героя (STRATZ, справжні натискання) і шкода ультимейта за натискання */
+  const SK=TB.skill&&TB.skill[p.hero_id],au=p.ability_uses,di=p.damage_inflictor||{};
+  if(SK&&au&&min>=20){
+    const ups=Array.isArray(p.ability_upgrades_arr)&&p.ability_upgrades_arr.length?new Set(p.ability_upgrades_arr.map(id=>TB.abId[id]).filter(Boolean)):null;
+    const ult=new Set(TB.cat.ult_control||[]),sk=[];
+    for(const a in SK){
+      const [p20,p50,dmed,n]=SK[a];if(!p20||(ups&&!ups.has(a)))continue;
+      const u=au[a]||0,rate=u/min,nm=(TB.abN&&TB.abN[a])||a;
+      if(rate<p20){sk.push({tier:rate<p20*.5?'imp':'min',a,t:L(`${nm}: ${u} ${P(u,'натискання|натискання|натискань')} за ${Math.round(min)} хв (${dec(rate*10)} на 10 хв). У 80% гравців на ${H(p)} більше: від ${dec(p20*10)} на 10 хв, у середньому ${dec(p50*10)} (на ${num(n)} іграх).`,
+        `${nm}: ${u} ${P(u,'','cast|casts')} in ${Math.round(min)} min (${dec(rate*10)} per 10 min). 80% of ${H(p)} players cast it more: ${dec(p20*10)}+ per 10 min, ${dec(p50*10)} on average (${num(n)} games).`,
+        `${nm}: ${u} ${P(u,'','','нажатие|нажатия|нажатий')} за ${Math.round(min)} мин (${dec(rate*10)} на 10 мин). У 80% игроков на ${H(p)} больше: от ${dec(p20*10)} на 10 мин, в среднем ${dec(p50*10)} (на ${num(n)} играх).`)});continue}
+      if(dmed&&ult.has(a)&&u>=2&&di[a]!=null){const per=di[a]/u;
+        if(per<dmed*.4)sk.push({tier:'imp',a,t:L(`${nm}: у середньому ${num(per)} шкоди за натискання, а в інших гравців на ${H(p)} ≈ ${num(dmed)} — ульта йшла «в нікуди».`,`${nm}: ${num(per)} damage per cast on average vs ≈ ${num(dmed)} for other ${H(p)} players — the ult hit nothing.`,`${nm}: в среднем ${num(per)} урона за нажатие, а у других игроков на ${H(p)} ≈ ${num(dmed)} — ульта уходила «в никуда».`)})}
+    }
+    sk.sort((a,b)=>DUMB_PTS[b.tier]-DUMB_PTS[a.tier]).slice(0,3).forEach(x=>add(x.tier,'skill:'+x.a,x.t));
+  }
   D.F.sort((a,b)=>b.pts-a.pts);
   const wi=D.F.filter(f=>f.d!=null&&ITEMK[f.k]).sort((a,b)=>b.d-a.d)[0];
   if(wi)D.whatIf={k:wi.k,n:ITEMK[wi.k].n,med:wi.med,d:wi.d};
@@ -2078,7 +2094,7 @@ function idb(){
   idbP=new Promise(res=>{try{const r=indexedDB.open('nafidyv',1);r.onupgradeneeded=()=>{try{r.result.createObjectStore('m')}catch(e){}};r.onsuccess=()=>res(r.result);r.onerror=()=>res(null);r.onblocked=()=>res(null)}catch(e){res(null)}});
   return idbP;
 }
-const SLIM_P=['cosmetics','ability_targets','damage_inflictor','damage_inflictor_received','hero_hits','ability_uses','item_win','item_usage','actions','life_state','neutral_tokens_log','permanent_buffs','damage_targets','camps_stacked_t','tower_damage_t','hero_damage_t','hero_healing_t','networth_t','times'];
+const SLIM_P=['cosmetics','ability_targets','damage_inflictor_received','hero_hits','item_win','item_usage','actions','life_state','neutral_tokens_log','permanent_buffs','damage_targets','camps_stacked_t','tower_damage_t','hero_damage_t','hero_healing_t','networth_t','times'];
 function slim(m){const o={...m};['cosmetics','all_word_counts','my_word_counts','od_data','metadata'].forEach(k=>delete o[k]);o.players=(m.players||[]).map(p=>{const q={...p};SLIM_P.forEach(k=>delete q[k]);return q});return o}
 async function cacheGet(id){
   id=String(id);if(memC.has(id))return memC.get(id);
@@ -2086,7 +2102,7 @@ async function cacheGet(id){
   return new Promise(res=>{try{const q=db.transaction('m').objectStore('m').get(id);q.onsuccess=()=>{const v=q.result||null;if(v)memC.set(id,v);res(v)};q.onerror=()=>res(null)}catch(e){res(null)}});
 }
 async function cachePut(id,m){
-  id=String(id);const v={t:Date.now(),m:slim(m)};memC.set(id,v);if(memC.size>MC_MAX)memC.delete(memC.keys().next().value);
+  id=String(id);const v={t:Date.now(),m:slim(m),v4:1};memC.set(id,v);if(memC.size>MC_MAX)memC.delete(memC.keys().next().value);
   const db=await idb();if(!db)return;
   try{
     let idx=(store.get(MC_IDX)||[]).filter(x=>x!==id);idx.push(id);
@@ -2099,7 +2115,8 @@ const matchOk=m=>m&&Array.isArray(m.players)&&m.players.length>1&&m.duration&&m.
 /* розпарсений матч уже не зміниться — беремо з кешу; нерозпарсений — лише якщо йому < 10 хв */
 async function getMatch(id){
   const c=await cacheGet(id);
-  if(c&&c.m&&(c.m.version!=null||Date.now()-c.t<10*60*1000))return c.m;
+  /* v4: у старому кеші без натискань скілів (c.v4) — розпарсений матч перезавантажуємо один раз */
+  if(c&&c.m&&((c.m.version!=null&&c.v4)||Date.now()-c.t<10*60*1000))return c.m;
   const m=await getJson(API+'/matches/'+id);
   if(matchOk(m))cachePut(id,m);
   return m;
@@ -2265,7 +2282,7 @@ async function buildRows(acc,list,job,onTick){
     try{const mm=await getMatch(m.match_id);if(matchOk(mm)){const c=analyze(mm),me=c.P.find(p=>p.account_id===acc);if(me)job.rows.push(statRow(c,me))}}
     catch(e){if(e.status===429){await sleep(20000)}}
     job.done++;onTick&&onTick();
-    if(!(cached&&cached.m&&cached.m.version!=null))await sleep(1100);
+    if(!(cached&&cached.m&&cached.m.version!=null&&cached.v4))await sleep(1100);
   }
 }
 function renderStats(){
@@ -2353,7 +2370,7 @@ function renderCrew(){
         try{const mm=await getMatch(m.match_id);if(matchOk(mm)){const c=analyze(mm),mp=c.P.find(p=>p.account_id===me.id);if(mp){const ids=new Set([me.id,...fr.map(x=>x.id)]);const crew=c.P.filter(p=>p.rad===mp.rad&&ids.has(p.account_id));if(crew.length>=2)J.games.push({mid:m.match_id,t:mm.start_time,won:mp.won,crew:crew.map(p=>({id:p.account_id,hero:p.hero_id,ruin:p.ruin,dumb:p.D?p.D.pts:0,culprit:p===c.culprit,mvp:p===c.mvp}))})}}}
         catch(e){if(e.status===429)await sleep(20000)}
         J.done++;if(V.view==='crew')throttle(renderCrew);
-        if(!(cached&&cached.m&&cached.m.version!=null))await sleep(1100);
+        if(!(cached&&cached.m&&cached.m.version!=null&&cached.v4))await sleep(1100);
       }
     }catch(e){J.err=e.message}J.loading=false;if(V.view==='crew')renderCrew()})();
   }
